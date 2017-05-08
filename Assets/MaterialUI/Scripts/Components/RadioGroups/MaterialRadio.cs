@@ -133,13 +133,19 @@ namespace MaterialUI
         {
             if (m_Interactable)
             {
-                m_DotImage.color = toggle.isOn ? m_OnColor : m_OffColor;
-                m_RingImage.color = toggle.isOn ? m_OnColor : m_OffColor;
+                if (m_DotImage != null)
+                    m_DotImage.color = toggle.isOn ? m_OnColor : m_OffColor;
+
+                if (m_RingImage != null)
+                    m_RingImage.color = toggle.isOn ? m_OnColor : m_OffColor;
             }
             else
             {
-                m_DotImage.color = m_DisabledColor;
-                m_RingImage.color = m_DisabledColor;
+
+                if (m_DotImage != null)
+                    m_DotImage.color = m_DisabledColor;
+                if (m_RingImage != null)
+                    m_RingImage.color = m_DisabledColor;
             }
         }
 #endif
