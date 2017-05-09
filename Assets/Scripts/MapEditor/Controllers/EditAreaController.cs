@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.EventSystems;
 
 /// <summary>
 /// This takes care of coordinating the editing area, handling object CRUD
@@ -27,6 +28,10 @@ public class EditAreaController : MonoBehaviour {
   // The point where user pressed the mouse.
   Vector3 mouseDownPos;
   bool dragInitiated;
+
+  // Selection tool
+  GameObject selectedObject;
+
 
   // Use this for initialization
   void Start() {
@@ -147,17 +152,18 @@ public class EditAreaController : MonoBehaviour {
   /// Processes the input for the selection tool.
   /// </summary>
   void ProcessInputForSelectionTool() {
-    
+    // When a selectable object is clicked we need to be informed. If a click
+    // happened when nothing is selected, we dismiss.
   }
 
   /// <summary>
   /// Processes the input for the aisle tool.
   /// </summary>
   void ProcessInputForAisleTool() {
-    Rect r;
-
-    if (ProcessInputForRectangleCreation(out r)) {
-      floorController.CreateAisle(r);
+    if (dragInitiated) {
+      Rect r;
+      bool completed = ProcessInputForRectangleCreation(out r);
+      floorController.CreateAisle(r, !completed);
     }
   }
 
@@ -165,10 +171,10 @@ public class EditAreaController : MonoBehaviour {
   /// Processes the input for the aisle area tool.
   /// </summary>
   void ProcessInputForAisleAreaTool() {
-    Rect r;
-
-    if (ProcessInputForRectangleCreation(out r)) {
-      floorController.CreateAisleArea(r);
+    if (dragInitiated) {
+      Rect r;
+      bool completed = ProcessInputForRectangleCreation(out r);
+      floorController.CreateAisleArea(r, !completed);
     }
   }
 
@@ -176,11 +182,10 @@ public class EditAreaController : MonoBehaviour {
   /// Processes the input for the wall tool.
   /// </summary>
   void ProcessInputForWallTool() {
-    Rect r;
-
-    if (ProcessInputForRectangleCreation(out r)) {
-      // Create the object using r.
-      Debug.Log(r);
+    if (dragInitiated) {
+      Rect r;
+      bool completed = ProcessInputForRectangleCreation(out r);
+      // floorController.CreateWall(r, !completed);
     }
   }
 
@@ -188,35 +193,41 @@ public class EditAreaController : MonoBehaviour {
   /// Processes the input for the landmark tool.
   /// </summary>
   void ProcessInputForLandmarkTool() {
-    Rect r;
-
-    if (ProcessInputForRectangleCreation(out r)) {
-      floorController.CreateLandmark(r);
+    if (dragInitiated) {
+      Rect r;
+      bool completed = ProcessInputForRectangleCreation(out r);
+      floorController.CreateLandmark(r, !completed);
     }
   }
 
   /// <summary>
   /// Processes the input for creating a rectangle. Returns true if rectangle is
-  /// completed and the rectangle is stored in the out parameter output.
+  /// completed. The rectangle is stored in the out parameter output.
   /// </summary>
   bool ProcessInputForRectangleCreation(out Rect rect) {
-    rect = new Rect();
+    rect = Rect.zero;
 
     if (!dragInitiated) {
       return false;
     }
 
-    if (Input.GetMouseButtonUp(0)) {
-      // User released the mouse! We now know our rectangle.
-      Vector2 p1 = canvas.InverseTransformPoint(Input.mousePosition);
-      Vector2 p2 = canvas.InverseTransformPoint(mouseDownPos);
+    Vector2 p1 = canvas.InverseTransformPoint(Input.mousePosition);
+    Vector2 p2 = canvas.InverseTransformPoint(mouseDownPos);
 
-      rect = Rect.MinMaxRect(
-        Mathf.Min(p1.x, p2.x), Mathf.Min(p1.y, p2.y), 
-        Mathf.Max(p1.x, p2.x), Mathf.Max(p1.y, p2.y)
-      );
-    }
+    rect = Rect.MinMaxRect(
+      Mathf.Min(p1.x, p2.x), Mathf.Min(p1.y, p2.y), 
+      Mathf.Max(p1.x, p2.x), Mathf.Max(p1.y, p2.y)
+    );
 
     return Input.GetMouseButtonUp(0);
+  }
+
+  /// <summary>
+  /// A simple callback method passed to each created floor object.
+  /// </summary>
+  /// <param name="clicked">The object being clicked.</param>
+  void OnClick(GameObject clicked) {
+    // We want to select this new object, so we should cease selecting the old
+    // object, disabling some transforms. We then need to update the inspector.
   }
 }

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using MaterialUI;
 using System.Linq;
+using UnityEngine.EventSystems;
 
 /// <summary>
 /// Represents a landmark on the screen. This is a bordered box with an icon on 
