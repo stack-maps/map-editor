@@ -7,8 +7,30 @@ namespace StackMaps {
   /// Represents a rotatable rectangle.
   /// </summary>
   public class Rectangle : MonoBehaviour {
-    public Vector2 center;
-    public Vector2 size;
-    public float rotation;
+    public Vector2 GetCenter() {
+      return ((RectTransform)transform).anchoredPosition;
+    }
+
+    public void SetCenter(Vector2 center) {
+      ((RectTransform)transform).anchoredPosition = center;
+    }
+
+    public Vector2 GetSize() {
+      return ((RectTransform)transform).sizeDelta;
+    }
+
+    public void SetSize(Vector2 size) {
+      ((RectTransform)transform).sizeDelta = size;
+    }
+
+    public float GetRotation() {
+      return transform.localEulerAngles.z;
+    }
+
+    public void SetRotation(float degrees) {
+      Vector3 angles = transform.localEulerAngles;
+      angles.z = degrees;
+      transform.localEulerAngles = angles;
+    }
   }
 }
