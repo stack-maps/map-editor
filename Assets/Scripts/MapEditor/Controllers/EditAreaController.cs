@@ -17,6 +17,10 @@ public class EditAreaController : MonoBehaviour {
   // The toolbar associated with the editing area.
   public ToolbarController toolbarController;
 
+  // The floor controller, a data-heavy class dealing with representation and
+  // serialization of the floor.
+  public FloorController floorController;
+
   public Texture2D cursorCrosshair;
   public Texture2D cursorPan;
 
@@ -153,8 +157,7 @@ public class EditAreaController : MonoBehaviour {
     Rect r;
 
     if (ProcessInputForRectangleCreation(out r)) {
-      // Create the object using r.
-      Debug.Log(r);
+      floorController.CreateAisle(r);
     }
   }
 
@@ -165,8 +168,7 @@ public class EditAreaController : MonoBehaviour {
     Rect r;
 
     if (ProcessInputForRectangleCreation(out r)) {
-      // Create the object using r.
-      Debug.Log(r);
+      floorController.CreateAisleArea(r);
     }
   }
 
@@ -189,8 +191,7 @@ public class EditAreaController : MonoBehaviour {
     Rect r;
 
     if (ProcessInputForRectangleCreation(out r)) {
-      // Create the object using r.
-      Debug.Log(r);
+      floorController.CreateLandmark(r);
     }
   }
 
@@ -207,14 +208,12 @@ public class EditAreaController : MonoBehaviour {
 
     if (Input.GetMouseButtonUp(0)) {
       // User released the mouse! We now know our rectangle.
-      float x1 = Input.mousePosition.x;
-      float y1 = Input.mousePosition.y;
-      float x2 = mouseDownPos.x;
-      float y2 = mouseDownPos.y;
+      Vector2 p1 = canvas.InverseTransformPoint(Input.mousePosition);
+      Vector2 p2 = canvas.InverseTransformPoint(mouseDownPos);
 
       rect = Rect.MinMaxRect(
-        Mathf.Min(x1, x2), Mathf.Min(y1, y2), 
-        Mathf.Max(x1, x2), Mathf.Max(y1, y2)
+        Mathf.Min(p1.x, p2.x), Mathf.Min(p1.y, p2.y), 
+        Mathf.Max(p1.x, p2.x), Mathf.Max(p1.y, p2.y)
       );
     }
 
