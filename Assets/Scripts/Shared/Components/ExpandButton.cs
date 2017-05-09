@@ -14,7 +14,7 @@ public class ExpandButton : MonoBehaviour {
 
   public bool isExpanded;
 
-  public float duration = 0.15f;
+  public float duration = 0.3f;
 
   int animId = -1;
 
