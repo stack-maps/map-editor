@@ -7,6 +7,9 @@ namespace StackMaps {
   /// This manages the property sub-editors in the sidebar.
   /// </summary>
   public class PropertyEditor : MonoBehaviour {
+
+    public ExpandButton expandButton;
+
     /// <summary>
     /// The landmark editor.
     /// </summary>
@@ -35,10 +38,16 @@ namespace StackMaps {
     /// <summary>
     /// The default empty selection.
     /// </summary>
-    public GameObject emptyEditor;
+    public SidebarElement emptyEditor;
+
+    GameObject selectedObject;
 
     void Start() {
-      SetSelectedObject(null);
+      SetSelectedObject(null, false);
+    }
+
+    public void OnExpandButtonPress() {
+      SetSelectedObject(selectedObject, true);
     }
 
     /// <summary>
@@ -46,13 +55,26 @@ namespace StackMaps {
     /// </summary>
     /// <param name="selected">Selected object. We look into its components and
     /// load appropriate sub-editors.</param>
-    public void SetSelectedObject(GameObject selected) {
-      emptyEditor.SetActive(selected == null);
+    /// <param name = "animated">Whether this is animated</param>
+    public void SetSelectedObject(GameObject selected, bool animated = true) {
+      selectedObject = selected;
+
+      emptyEditor.Show(expandButton.isExpanded && selected == null, animated);
       landmarkEditor.SetEditingObject(selected);
+      landmarkEditor.Show(expandButton.isExpanded &&
+      landmarkEditor.GetEditingObject() != null, animated);
       aisleEditor.SetEditingObject(selected);
+      aisleEditor.Show(expandButton.isExpanded &&
+      aisleEditor.GetEditingObject() != null, animated);
       aisleAreaEditor.SetEditingObject(selected);
+      aisleAreaEditor.Show(expandButton.isExpanded &&
+      aisleAreaEditor.GetEditingObject() != null, animated);
       wallEditor.SetEditingObject(selected);
+      wallEditor.Show(expandButton.isExpanded &&
+      wallEditor.GetEditingObject() != null, animated);
       rectangleEditor.SetEditingObject(selected);
+      rectangleEditor.Show(expandButton.isExpanded &&
+      rectangleEditor.GetEditingObject() != null, animated);
     }
   }
 }

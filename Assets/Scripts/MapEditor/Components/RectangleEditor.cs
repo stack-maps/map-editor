@@ -7,7 +7,7 @@ namespace StackMaps {
   /// <summary>
   /// This manages the rectangle sub-editor of the property editor.
   /// </summary>
-  public class RectangleEditor : MonoBehaviour {
+  public class RectangleEditor : SidebarElement {
     Rectangle editingObject;
 
     public InputField xInputField;
@@ -28,8 +28,15 @@ namespace StackMaps {
         editingObject = obj.GetComponent<Rectangle>();
       }
 
-      gameObject.SetActive(editingObject != null);
       PopulateObject();
+    }
+
+    /// <summary>
+    /// Returns the currently editing game object.
+    /// </summary>
+    /// <returns>The editing object.</returns>
+    public GameObject GetEditingObject() {
+      return editingObject == null? null : editingObject.gameObject;
     }
 
     /// <summary>

@@ -241,11 +241,12 @@ namespace StackMaps {
 
 
       // We might need some visual changes too, but for now, let's just do this.
-      if (clicked == scrollRect.viewport.gameObject) {
+      if (clicked == scrollRect.gameObject) {
         selectedObject = null;
       } else {
         selectedObject = clicked;
       }
+
 
       sidebarController.propertyEditor.SetSelectedObject(selectedObject);
     }

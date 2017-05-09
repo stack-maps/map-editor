@@ -7,7 +7,7 @@ namespace StackMaps {
   /// <summary>
   /// This manages the landmark sub-editor of the property editor.
   /// </summary>
-  public class LandmarkEditor : MonoBehaviour {
+  public class LandmarkEditor : SidebarElement {
     public MaterialDropdown landmarkTypeDropdown;
 
     Landmark editingObject;
@@ -24,8 +24,15 @@ namespace StackMaps {
         editingObject = obj.GetComponent<Landmark>();
       }
 
-      gameObject.SetActive(editingObject != null);
       PopulateObject();
+    }
+
+    /// <summary>
+    /// Returns the currently editing game object.
+    /// </summary>
+    /// <returns>The editing object.</returns>
+    public GameObject GetEditingObject() {
+      return editingObject == null? null : editingObject.gameObject;
     }
 
     /// <summary>

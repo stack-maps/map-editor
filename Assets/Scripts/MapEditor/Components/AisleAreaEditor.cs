@@ -6,7 +6,7 @@ namespace StackMaps {
   /// <summary>
   /// This manages the aisle area sub-editor of the property editor.
   /// </summary>
-  public class AisleAreaEditor : MonoBehaviour {
+  public class AisleAreaEditor : SidebarElement {
     AisleArea editingObject;
 
     /// <summary>
@@ -21,7 +21,14 @@ namespace StackMaps {
         editingObject = obj.GetComponent<AisleArea>();
       }
 
-      gameObject.SetActive(editingObject != null);
+    }
+
+    /// <summary>
+    /// Returns the currently editing game object.
+    /// </summary>
+    /// <returns>The editing object.</returns>
+    public GameObject GetEditingObject() {
+      return editingObject == null? null : editingObject.gameObject;
     }
   }
 }

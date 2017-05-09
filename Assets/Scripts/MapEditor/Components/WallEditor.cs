@@ -6,7 +6,7 @@ namespace StackMaps {
   /// <summary>
   /// This manages the wall sub-editor of the property editor.
   /// </summary>
-  public class WallEditor : MonoBehaviour {
+  public class WallEditor : SidebarElement {
     Wall editingObject;
 
     /// <summary>
@@ -20,8 +20,14 @@ namespace StackMaps {
       } else {
         editingObject = obj.GetComponent<Wall>();
       }
+    }
 
-      gameObject.SetActive(editingObject != null);
+    /// <summary>
+    /// Returns the currently editing game object.
+    /// </summary>
+    /// <returns>The editing object.</returns>
+    public GameObject GetEditingObject() {
+      return editingObject == null? null : editingObject.gameObject;
     }
   }
 }
