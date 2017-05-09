@@ -20,6 +20,8 @@ namespace StackMaps {
       } else {
         editingObject = obj.GetComponent<Aisle>();
       }
+
+      PopulateObject();
     }
 
     /// <summary>
@@ -28,6 +30,28 @@ namespace StackMaps {
     /// <returns>The editing object.</returns>
     public GameObject GetEditingObject() {
       return editingObject == null? null : editingObject.gameObject;
+    }
+
+    /// <summary>
+    /// Populates the editor with editing object's values.
+    /// </summary>
+    void PopulateObject() {
+      if (editingObject == null) {
+        return;
+      }
+
+
+    }
+
+    /// <summary>
+    /// Updates the editing object with this editor's values.
+    /// </summary>
+    public void UpdateObject() {
+      if (editingObject == null) {
+        return;
+      }
+
+
     }
   }
 }
