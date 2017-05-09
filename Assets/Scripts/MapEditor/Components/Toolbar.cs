@@ -60,8 +60,10 @@ public class Toolbar : MonoBehaviour {
   /// Ensures only one button is active.
   /// </summary>
   void CheckTool(ToolType t) {
-    // Restore active tool color
+    // Restore active tool
     ToolType local = activeTool;
+    tool2Button[local].canvasGroup.interactable = true;
+    tool2Button[local].materialRipple.enabled = true;
 
     TweenManager.TweenColor(v => tool2Button[local].iconColor = v, 
       tool2Button[local].iconColor, normalColor, animationDuration);
@@ -72,6 +74,8 @@ public class Toolbar : MonoBehaviour {
 
     activeTool = t;
     activeToolText.text = tool2Button[t].GetComponent<Tooltip>().tooltip;
+    tool2Button[activeTool].canvasGroup.interactable = false;
+    tool2Button[activeTool].materialRipple.enabled = false;
   }
 
   /// <summary>

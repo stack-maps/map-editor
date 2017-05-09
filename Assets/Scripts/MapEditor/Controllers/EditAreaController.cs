@@ -29,10 +29,6 @@ public class EditAreaController : MonoBehaviour {
   Vector3 mouseDownPos;
   bool dragInitiated;
 
-  // Selection tool
-  GameObject selectedObject;
-
-
   // Use this for initialization
   void Start() {
   }
@@ -220,14 +216,5 @@ public class EditAreaController : MonoBehaviour {
     );
 
     return Input.GetMouseButtonUp(0);
-  }
-
-  /// <summary>
-  /// A simple callback method passed to each created floor object.
-  /// </summary>
-  /// <param name="clicked">The object being clicked.</param>
-  void OnClick(GameObject clicked) {
-    // We want to select this new object, so we should cease selecting the old
-    // object, disabling some transforms. We then need to update the inspector.
   }
 }
