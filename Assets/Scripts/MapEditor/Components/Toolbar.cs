@@ -20,15 +20,11 @@ public class Toolbar : MonoBehaviour {
   public MaterialButton referenceImageButton;
   public MaterialButton zoomButton;
 
-  // A tooltip object, to show user which tool is selected in text.
-  public Text activeToolText;
-
-
   // The currently active tool.
   ToolType activeTool = ToolType.SelectionTool;
 
   // Convenience variable.
-  readonly Dictionary<ToolType, MaterialButton> tool2Button = new Dictionary<ToolType, MaterialButton>();
+  Dictionary<ToolType, MaterialButton> tool2Button;
 
   // The default normal color of the tools.
   public Color normalColor = new Color32(0x00, 0x00, 0x00, 0x8A);
@@ -39,12 +35,17 @@ public class Toolbar : MonoBehaviour {
   // Duration of tool switching animation.
   public float animationDuration = 0.3f;
 
+  // The tooltip for the active tool.
+  public Text activeToolText;
+
   void Start() {
     // Injecting a function on all tools so only one is active at a time.
     MaterialButton[] tools =
     {
       cursorButton, aisleButton, aisleAreaButton, wallButton, landmarkButton
     };
+
+    tool2Button = new Dictionary<ToolType, MaterialButton>();
 
     for (int i = 0; i < tools.Length; i++) {
       ToolType t = (ToolType)i;
@@ -70,8 +71,14 @@ public class Toolbar : MonoBehaviour {
       tool2Button[t].iconColor, highlightColor, animationDuration);
 
     activeTool = t;
-
-    // This is a bit of a hack, since I know each button has a Tooltip component
     activeToolText.text = tool2Button[t].GetComponent<Tooltip>().tooltip;
+  }
+
+  /// <summary>
+  /// Gets the active tool.
+  /// </summary>
+  /// <returns>The active tool.</returns>
+  public ToolType GetActiveTool() {
+    return activeTool;
   }
 }

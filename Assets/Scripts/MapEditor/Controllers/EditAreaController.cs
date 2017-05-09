@@ -4,9 +4,14 @@ using UnityEngine;
 using UnityEngine.UI;
 
 public class EditAreaController : MonoBehaviour {
+  // The canvas where things are actually on the map.
   public RectTransform canvas;
 
+  // The scroll rect of the edit area.
   public ScrollRect scrollRect;
+
+  // The toolbar associated with the editing area.
+  public ToolbarController toolbarController;
 
 	// Use this for initialization
 	void Start () {
@@ -14,7 +19,7 @@ public class EditAreaController : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
-		
+    ToggleScrolling(toolbarController.toolbar.GetActiveTool() == ToolType.SelectionTool);
 	}
 
   // These levels of zoom are arbitrary and can be changed any time.
@@ -25,7 +30,10 @@ public class EditAreaController : MonoBehaviour {
   /// </summary>
   /// <param name="zoomLevel">Zoom level.</param>
   public void UpdateZoom(int zoomLevel) {
-    if (zoomLevel < zoomLevels.Length) {
+    if (zoomLevel < 0) {
+      // We didn't select anything. do nothing.
+      return;
+    } else if (zoomLevel < zoomLevels.Length) {
       canvas.localScale = new Vector3(zoomLevels[zoomLevel], zoomLevels[zoomLevel], 1);
     } else if (zoomLevel == zoomLevels.Length) {
       // We assume we want fit width here. Do some calculations.
@@ -40,6 +48,15 @@ public class EditAreaController : MonoBehaviour {
       float ratio = Mathf.Min(ratio1, ratio2);
       canvas.localScale = new Vector3(ratio, ratio, 1);
     }
+  }
+
+  /// <summary>
+  /// Toggles the ability to scroll on the canvas.
+  /// </summary>
+  /// <param name="canScroll">If set to <c>true</c>, user can scroll.</param>
+  public void ToggleScrolling(bool canScroll) {
+    scrollRect.horizontal = canScroll;
+    scrollRect.vertical = canScroll;
   }
 
 }
