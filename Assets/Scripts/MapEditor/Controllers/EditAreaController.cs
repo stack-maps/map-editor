@@ -39,6 +39,7 @@ namespace StackMaps {
 
     // Use this for initialization
     void Start() {
+      Input.multiTouchEnabled = false;
       Selectable.delegates.Add(ProcessSelection);
     }
 	
@@ -188,9 +189,10 @@ namespace StackMaps {
     /// </summary>
     void ProcessInputForWallTool() {
       if (dragInitiated) {
-        Rect r;
-        bool completed = ProcessInputForRectangleCreation(out r);
-        // floorController.CreateWall(r, !completed);
+        bool completed = Input.GetMouseButtonUp(0);
+        Vector2 begin = canvas.InverseTransformPoint(mouseDownPos);
+        Vector2 end = canvas.InverseTransformPoint(Input.mousePosition);
+        floorController.CreateWall(begin, end, !completed);
       }
     }
 

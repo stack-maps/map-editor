@@ -12,7 +12,17 @@ namespace StackMaps {
     // Whether this aisle is single sided.
     public bool singleSided;
 
-    public List<CallNumberRange> callNumberRanges = new List<CallNumberRange>();
+    public List<CallNumberRange> callNumberRanges;
+
+    void Awake() {
+      // Initializes a stack to be two sided with two call number ranges.
+      callNumberRanges = new List<CallNumberRange> {
+        new CallNumberRange(), new CallNumberRange()
+      };
+
+      callNumberRanges[0].isSideA = true;
+      callNumberRanges[1].isSideA = false;
+    }
 
     // Used to toggle sides.
     public Text sideAText;

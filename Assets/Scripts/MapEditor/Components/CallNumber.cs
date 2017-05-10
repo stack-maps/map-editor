@@ -195,16 +195,29 @@ namespace StackMaps {
     #endregion
 
     /// <summary>
+    /// Whether this call number has a class defined.
+    /// </summary>
+    public bool HasClass() {
+      return cnClass.Length > 0;
+    }
+
+    /// <summary>
     /// Whether this call number has a subclass defined.
     /// </summary>
     public bool HasSubclass() {
       return cnSubclass.Length > 0;
     }
 
+    /// <summary>
+    /// Whether this call number has the first cutter defined.
+    /// </summary>
     public bool HasCutter1() {
       return cnCutter1.Length > 0;
     }
 
+    /// <summary>
+    /// Whether this call number has the second cutter defined.
+    /// </summary>
     public bool HasCutter2() {
       return cnCutter2.Length > 0;
     }

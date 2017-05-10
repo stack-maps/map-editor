@@ -48,6 +48,10 @@ namespace StackMaps {
     /// </summary>
     CanvasGroup previewObject;
 
+    // TODO: these creation methods are kind of dumb with repetitive code. Think
+    // about refactoring them at a later stage might be a good idea.
+
+
     /// <summary>
     /// Creates a new landmark and adds it to the floor.
     /// </summary>
@@ -137,6 +141,35 @@ namespace StackMaps {
         ((RectTransform)obj.transform).sizeDelta = rect.size;
         ((RectTransform)obj.transform).anchoredPosition = rect.center;
         aisles.Add(obj);
+        ClearPreview();
+      }
+    }
+
+    /// <summary>
+    /// Creates a wall between the given two points.
+    /// </summary>
+    /// <param name="begin">Begin.</param>
+    /// <param name="end">End.</param>
+    /// <param name="preview">If set to <c>true</c> preview.</param>
+    public void CreateWall(Vector2 begin, Vector2 end, bool preview) {
+      if (preview) {
+        // Destroys preview if it is of a different type
+        if (previewObject != null && previewObject.GetComponent<Wall>() == null) {
+          ClearPreview();
+        }
+
+        // Create a preview object if it is not there already.
+        if (previewObject == null) {
+          previewObject = Instantiate(wallPrefab, previewLayer).GetComponent<CanvasGroup>();
+          previewObject.alpha = 0.5f;
+        }
+
+        // Need to update the wall's looks.
+      } else {
+        // Clears the preview object.
+        Wall obj = Instantiate(wallPrefab, wallLayer);
+        // Need to update the wall's looks.
+        walls.Add(obj);
         ClearPreview();
       }
     }

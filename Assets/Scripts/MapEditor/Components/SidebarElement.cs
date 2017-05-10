@@ -50,5 +50,16 @@ namespace StackMaps {
         }
       }
     }
+
+    /// <summary>
+    /// Animates deletion. Will call Destroy on this GameObject.
+    /// </summary>
+    public void Delete() {
+      if (heightConstraint != null) {
+        TweenManager.TweenFloat(v => heightConstraint.minHeight = v, 
+          heightConstraint.minHeight, 0, animationDuration, 0, 
+          () => Destroy(gameObject));
+      }
+    }
   }
 }
