@@ -164,13 +164,15 @@ namespace StackMaps {
           previewObject.alpha = 0.5f;
         }
 
-        // Need to update the wall's looks.
+        previewObject.GetComponent<Wall>().SetStart(begin);
+        previewObject.GetComponent<Wall>().SetEnd(end);
       } else {
         // Clears the preview object.
         Wall obj = Instantiate(wallPrefab, wallLayer);
-        // Need to update the wall's looks.
         walls.Add(obj);
         ClearPreview();
+        obj.SetStart(begin);
+        obj.SetEnd(end);
       }
     }
 
