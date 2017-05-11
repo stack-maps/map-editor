@@ -10,7 +10,6 @@ namespace StackMaps {
   /// Represents a landmark on the screen. This is a bordered box with an icon on 
   /// top.
   /// </summary>
-  [ExecuteInEditMode]
   public class Landmark : MonoBehaviour {
     public VectorImage icon;
 

@@ -13,6 +13,9 @@ namespace StackMaps {
     /// </summary>
     public bool disableEditing;
 
+    /// <summary>
+    /// Gets the center in relative position to the canvas.
+    /// </summary>
     public Vector2 GetCenter() {
       return ((RectTransform)transform).anchoredPosition;
     }

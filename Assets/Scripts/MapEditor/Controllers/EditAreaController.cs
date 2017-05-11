@@ -22,6 +22,9 @@ namespace StackMaps {
     // The sidebar associated with the editing area.
     public SidebarController sidebarController;
 
+    // The transform editor.
+    public TransformEditor transformEditor;
+
     // The floor controller, a data-heavy class dealing with representation and
     // serialization of the floor.
     public FloorController floorController;
@@ -57,6 +60,11 @@ namespace StackMaps {
 
       // Tool-related updates
       ProcessInputForTools();
+
+      if (toolbarController.toolbar.GetActiveTool() != ToolType.SelectionTool) {
+        // Unselect if we changed tool.
+        ProcessSelection(null);
+      }
 
       // Finally reset drag
       if (Input.GetMouseButtonUp(0)) {
@@ -241,7 +249,6 @@ namespace StackMaps {
         return;
       }
 
-
       // We might need some visual changes too, but for now, let's just do this.
       if (clicked == scrollRect.gameObject) {
         selectedObject = null;
@@ -249,8 +256,8 @@ namespace StackMaps {
         selectedObject = clicked;
       }
 
-
       sidebarController.propertyEditor.SetSelectedObject(selectedObject);
+      transformEditor.SetEditingObject(selectedObject);
     }
   }
 }
