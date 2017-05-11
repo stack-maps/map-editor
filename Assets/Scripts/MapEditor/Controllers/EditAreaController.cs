@@ -98,6 +98,8 @@ namespace StackMaps {
         float ratio = Mathf.Min(ratio1, ratio2);
         canvas.localScale = new Vector3(ratio, ratio, 1);
       }
+
+      transformEditor.canvasScale = canvas.localScale.x;
     }
 
     /// <summary>
@@ -127,12 +129,14 @@ namespace StackMaps {
         return;
       }
 
-      ToolType current = toolbarController.toolbar.GetActiveTool();
-      float delta = (Input.mousePosition - mouseDownPos).magnitude;
+      // Transform editor is responsible for setting the cursor. Return.
+      if (transformEditor.IsDragging()) {
+        return;
+      }
 
-      if (current == ToolType.SelectionTool && dragInitiated && delta > 0) {
-        Cursor.SetCursor(cursorPan, new Vector2(17.5f, 17.5f), CursorMode.Auto);
-      } else if (current != ToolType.SelectionTool) {
+      ToolType current = toolbarController.toolbar.GetActiveTool();
+
+      if (current != ToolType.SelectionTool) {
         Cursor.SetCursor(cursorCrosshair, new Vector2(17.5f, 17.5f), CursorMode.Auto);
       } else {
         Cursor.SetCursor(null, Vector2.zero, CursorMode.Auto);
@@ -242,14 +246,13 @@ namespace StackMaps {
     /// </summary>
     void ProcessSelection(GameObject clicked) {
       if (toolbarController.toolbar.GetActiveTool() != ToolType.SelectionTool) {
-        return;
+        clicked = null;
       }
 
       if (clicked == selectedObject) {
         return;
       }
 
-      // We might need some visual changes too, but for now, let's just do this.
       if (clicked == scrollRect.gameObject) {
         selectedObject = null;
       } else {

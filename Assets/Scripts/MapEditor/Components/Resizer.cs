@@ -7,6 +7,14 @@ namespace StackMaps {
   /// Updates the transform such that the width is parent's height and vice versa.
   /// </summary>
   public class Resizer : MonoBehaviour {
+    /// <summary>
+    /// A margin from the edge.
+    /// </summary>
+    public Vector2 margin;
+
+    /// <summary>
+    /// Should we swap the height and width?
+    /// </summary>
     public bool swapWidthHeight = false;
 
     // Update is called once per frame
@@ -15,9 +23,9 @@ namespace StackMaps {
         Rect r = ((RectTransform)transform.parent).rect;
 
         if (swapWidthHeight)
-          ((RectTransform)transform).sizeDelta = new Vector2(r.height, r.width);
+          ((RectTransform)transform).sizeDelta = new Vector2(Mathf.Abs(r.height), Mathf.Abs(r.width)) - margin * 2;
         else
-          ((RectTransform)transform).sizeDelta = r.size;
+          ((RectTransform)transform).sizeDelta = new Vector2(Mathf.Abs(r.width), Mathf.Abs(r.height)) - margin * 2;
       }
     }
   }

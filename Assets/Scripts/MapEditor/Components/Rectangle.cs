@@ -41,5 +41,12 @@ namespace StackMaps {
       angles.z = degrees;
       transform.localEulerAngles = angles;
     }
+
+    public Rect GetRect() {
+      Vector2 c = GetCenter();
+      Vector2 s = GetSize();
+
+      return new Rect(c - s / 2, s);
+    }
   }
 }

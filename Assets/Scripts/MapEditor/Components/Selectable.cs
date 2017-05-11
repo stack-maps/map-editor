@@ -8,10 +8,15 @@ namespace StackMaps {
   /// Marks this object as selectable by the editor.
   /// </summary>
   public class Selectable : MonoBehaviour, IPointerClickHandler {
+    public bool sendCallback = true;
+
     #region IPointerClickHandler implementation
 
     public void OnPointerClick(PointerEventData eventData) {
       // Relay this information to all delegates
+      if (!sendCallback)
+        return;
+      
       foreach (SelectableDelegate d in delegates) {
         d(gameObject);
       }
@@ -20,6 +25,7 @@ namespace StackMaps {
     #endregion
 
     public delegate void SelectableDelegate(GameObject selected);
+
 
     /// <summary>
     /// A list of delegates that will receive calls when any object is clicked.
