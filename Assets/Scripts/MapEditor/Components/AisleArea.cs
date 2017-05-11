@@ -33,8 +33,8 @@ namespace StackMaps {
       }
 
       horizontal = orientation;
-      container.GetComponent<Resizer>().swapWidthHeight = !horizontal;
-      container.localEulerAngles = new Vector3(0, 0, horizontal ? 0 : 90);
+      container.GetComponent<Resizer>().swapWidthHeight = horizontal;
+      container.localEulerAngles = new Vector3(0, 0, horizontal ? 90 : 0);
     }
 
   }

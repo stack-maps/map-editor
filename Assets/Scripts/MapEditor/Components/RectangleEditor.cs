@@ -26,6 +26,10 @@ namespace StackMaps {
         editingObject = null;
       } else {
         editingObject = obj.GetComponent<Rectangle>();
+
+        if (editingObject != null && editingObject.disableEditing) {
+          editingObject = null;
+        }
       }
 
       PopulateObject();

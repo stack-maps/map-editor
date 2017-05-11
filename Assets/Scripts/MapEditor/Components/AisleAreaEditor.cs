@@ -74,11 +74,14 @@ namespace StackMaps {
       for (int i = 0; desired > current + i; i++) {
         Aisle obj = Instantiate(aislePrefab, editingObject.container);
         editingObject.aisles.Add(obj);
+        obj.GetComponent<Rectangle>().disableEditing = true;
       }
  
       // Otherwise we remove them.
       for (int i = 0; current - i > desired; i++) {
+        Aisle obj = editingObject.aisles[desired];
         editingObject.aisles.RemoveAt(desired);
+        Destroy(obj.gameObject);
       }
     }
   }

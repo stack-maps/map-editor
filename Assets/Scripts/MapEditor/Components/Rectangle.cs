@@ -7,6 +7,12 @@ namespace StackMaps {
   /// Represents a rotatable rectangle.
   /// </summary>
   public class Rectangle : MonoBehaviour {
+
+    /// <summary>
+    /// If true, rectangle will not show up in the editor.
+    /// </summary>
+    public bool disableEditing;
+
     public Vector2 GetCenter() {
       return ((RectTransform)transform).anchoredPosition;
     }
