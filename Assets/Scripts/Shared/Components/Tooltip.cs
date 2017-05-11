@@ -15,6 +15,7 @@ namespace Util {
     /// <summary>
     /// The tooltip to display about this component.
     /// </summary>
+    [TextArea]
     public string tooltip = "Nothing interesting happens.";
 
     /// <summary>

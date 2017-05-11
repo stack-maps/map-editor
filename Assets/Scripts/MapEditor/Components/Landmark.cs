@@ -5,24 +5,25 @@ using MaterialUI;
 using System.Linq;
 using UnityEngine.EventSystems;
 
-/// <summary>
-/// Represents a landmark on the screen. This is a bordered box with an icon on 
-/// top.
-/// </summary>
-[ExecuteInEditMode]
-public class Landmark : MonoBehaviour {
-  public VectorImage icon;
+namespace StackMaps {
+  /// <summary>
+  /// Represents a landmark on the screen. This is a bordered box with an icon on 
+  /// top.
+  /// </summary>
+  [ExecuteInEditMode]
+  public class Landmark : MonoBehaviour {
+    public VectorImage icon;
 
-  public LandmarkType landmarkType;
+    public LandmarkType landmarkType;
 
-  Dictionary<LandmarkType, ImageData> landmarkIcons;
+    Dictionary<LandmarkType, ImageData> landmarkIcons;
 
-  void Awake() {
-    landmarkIcons = new Dictionary<LandmarkType, ImageData>
-    {
-      { LandmarkType.Stairs, GetIconFromIconFont("CommunityMD", "stairs") },
-      { LandmarkType.Elevator, GetIconFromIconFont("CommunityMD", "elevator") },
+    void Awake() {
+      landmarkIcons = new Dictionary<LandmarkType, ImageData>
       {
+        { LandmarkType.Stairs, GetIconFromIconFont("CommunityMD", "stairs") },
+        { LandmarkType.Elevator, GetIconFromIconFont("CommunityMD", "elevator") },
+        {
         LandmarkType.Restroom,
         GetIconFromIconFont("CommunityMD", "human_male_female")
       }
@@ -47,4 +48,5 @@ public class Landmark : MonoBehaviour {
 
     return new ImageData(new VectorImageData(glyph, font));
   }
+}
 }
