@@ -120,6 +120,8 @@ namespace StackMaps {
     /// <param name="rect">Dimensions of the aisle.</param>
     /// <param name = "preview">Whether this is only a preview of the real object.</param>
     public void CreateAisle(Rect rect, bool preview) {
+      Rectangle t;
+
       if (preview) {
         // Destroys preview if it is of a different type
         if (previewObject != null && previewObject.GetComponent<Aisle>() == null) {
@@ -132,17 +134,21 @@ namespace StackMaps {
           previewObject.alpha = 0.5f;
         }
 
-        // Resize
-        ((RectTransform)previewObject.transform).sizeDelta = rect.size;
-        ((RectTransform)previewObject.transform).anchoredPosition = rect.center;
+        t = previewObject.GetComponent<Rectangle>();
       } else {
         // Clears the preview object.
         Aisle obj = Instantiate(aislePrefab, aisleLayer);
-        ((RectTransform)obj.transform).sizeDelta = rect.size;
-        ((RectTransform)obj.transform).anchoredPosition = rect.center;
+        t = obj.GetComponent<Rectangle>();
         aisles.Add(obj);
         ClearPreview();
       }
+
+      // Resize - we do something more here. We want to rotate the aisle
+      // depending on whichever side is longer.
+      bool shouldRotate = rect.width > rect.height;
+      t.SetRotation(shouldRotate? 90 : 0);
+      t.SetSize(shouldRotate? new Vector2(rect.height, rect.width) : rect.size);
+      t.SetCenter(rect.center);
     }
 
     /// <summary>
