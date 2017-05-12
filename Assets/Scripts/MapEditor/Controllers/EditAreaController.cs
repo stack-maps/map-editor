@@ -262,5 +262,17 @@ namespace StackMaps {
       sidebarController.propertyEditor.SetSelectedObject(selectedObject);
       transformEditor.SetEditingObject(selectedObject);
     }
+
+    /// <summary>
+    /// Deletes the currently selected object.
+    /// </summary>
+    public void OnDeleteButtonPressed() {
+      if (selectedObject == null) {
+        return;
+      }
+
+      Destroy(selectedObject.gameObject);
+      ProcessSelection(null);
+    }
   }
 }
