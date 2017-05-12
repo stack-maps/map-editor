@@ -60,6 +60,7 @@ namespace StackMaps {
 
       // Tool-related updates
       ProcessInputForTools();
+      toolbarController.toolbar.deleteButton.interactable = selectedObject != null;
 
       if (toolbarController.toolbar.GetActiveTool() != ToolType.SelectionTool) {
         // Unselect if we changed tool.
@@ -266,13 +267,27 @@ namespace StackMaps {
     /// <summary>
     /// Deletes the currently selected object.
     /// </summary>
-    public void OnDeleteButtonPressed() {
+    public void OnDeleteButtonPress() {
       if (selectedObject == null) {
         return;
       }
 
       Destroy(selectedObject.gameObject);
       ProcessSelection(null);
+    }
+
+    /// <summary>
+    /// Undoes last action.
+    /// </summary>
+    public void OnUndoButtonPress() {
+      ActionManager.shared.Undo();
+    }
+
+    /// <summary>
+    /// Redoes last action.
+    /// </summary>
+    public void OnRedoButtonPress() {
+      ActionManager.shared.Redo();
     }
   }
 }
