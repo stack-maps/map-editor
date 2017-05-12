@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using MaterialUI;
 using UnityEngine.EventSystems;
 
 namespace StackMaps {
@@ -34,13 +35,15 @@ namespace StackMaps {
 
     public Image translateHandleGraphics;
 
+    CanvasGroup canvasGroup;
+
     /// <summary>
     /// The current canvas scale. This is required since the screen-coordinates
     /// are not necessarily to be the same as the canvas coordinates.
     /// </summary>
     public float canvasScale = 1;
 
-    Rectangle editingObject;
+    Rectangle editingRect;
 
     Wall editingWall;
 
@@ -51,10 +54,10 @@ namespace StackMaps {
     /// <param name="obj">Object.</param>
     public void SetEditingObject(GameObject obj) {
       if (obj == null) {
-        editingObject = null;
+        editingRect = null;
         editingWall = null;
       } else {
-        editingObject = obj.GetComponent<Rectangle>();
+        editingRect = obj.GetComponent<Rectangle>();
         editingWall = obj.GetComponent<Wall>();
       }
 
@@ -65,15 +68,17 @@ namespace StackMaps {
     /// Depending on which object we are editing, we switch visibility modes.
     /// </summary>
     void SwitchMode() {
-      if (editingObject != null) {
+      if (editingRect != null) {
         
-        rotationHandle.gameObject.SetActive(true);
-        resizeHandleTL.gameObject.SetActive(true);
-        resizeHandleT.gameObject.SetActive(true);
-        resizeHandleTR.gameObject.SetActive(true);
-        resizeHandleBL.gameObject.SetActive(true);
-        resizeHandleB.gameObject.SetActive(true);
-        resizeHandleBR.gameObject.SetActive(true);
+        rotationHandle.gameObject.SetActive(!editingRect.disableEditing);
+        resizeHandleTL.gameObject.SetActive(!editingRect.disableEditing);
+        resizeHandleT.gameObject.SetActive(!editingRect.disableEditing);
+        resizeHandleL.gameObject.SetActive(!editingRect.disableEditing);
+        resizeHandleR.gameObject.SetActive(!editingRect.disableEditing);
+        resizeHandleTR.gameObject.SetActive(!editingRect.disableEditing);
+        resizeHandleBL.gameObject.SetActive(!editingRect.disableEditing);
+        resizeHandleB.gameObject.SetActive(!editingRect.disableEditing);
+        resizeHandleBR.gameObject.SetActive(!editingRect.disableEditing);
 
         translateHandleGraphics.color = new Color32(0, 0, 0, 0x40);
 
@@ -85,6 +90,8 @@ namespace StackMaps {
         rotationHandle.gameObject.SetActive(false);
         resizeHandleTL.gameObject.SetActive(false);
         resizeHandleT.gameObject.SetActive(false);
+        resizeHandleL.gameObject.SetActive(true);
+        resizeHandleR.gameObject.SetActive(true);
         resizeHandleTR.gameObject.SetActive(false);
         resizeHandleBL.gameObject.SetActive(false);
         resizeHandleB.gameObject.SetActive(false);
@@ -100,17 +107,24 @@ namespace StackMaps {
         UpdateTransform();
       }
 
-      gameObject.SetActive(editingObject != null || editingWall != null);
+      if (canvasGroup == null) {
+        canvasGroup = GetComponent<CanvasGroup>();
+      }
+
+      canvasGroup.interactable = editingRect != null || editingWall != null;
+      float goal = canvasGroup.interactable? 1 : 0;
+      canvasGroup.blocksRaycasts = canvasGroup.interactable;
+      TweenManager.TweenFloat(v => canvasGroup.alpha = v, canvasGroup.alpha, goal, 0.15f);
     }
 
     /// <summary>
     /// Sets up the center, size and rotation according to the editing object.
     /// </summary>
     public void UpdateTransform() {
-      if (editingObject != null) {
-        transform.localPosition = editingObject.GetCenter();
-        ((RectTransform)transform).sizeDelta = editingObject.GetSize();
-        transform.localEulerAngles = new Vector3(0, 0, editingObject.GetRotation());
+      if (editingRect != null) {
+        transform.position = editingRect.transform.position;
+        ((RectTransform)transform).sizeDelta = editingRect.GetSize();
+        transform.localEulerAngles = new Vector3(0, 0, editingRect.GetRotation());
       } else if (editingWall != null) {
         RectTransform t = editingWall.transform as RectTransform;
         ((RectTransform)transform).anchoredPosition = t.anchoredPosition;
@@ -122,15 +136,15 @@ namespace StackMaps {
     /// <summary>
     /// Defines all handle actions.
     /// </summary>
-    void Start() {
+    void Awake() {
       shared = this;
       float uiScale = FindObjectOfType<Canvas>().scaleFactor;
 
       translationHandle.dragHandler = data => {
         Vector2 delta = data.delta / canvasScale / uiScale;
 
-        if (editingObject != null) {
-          editingObject.SetCenter(editingObject.GetCenter() + delta);
+        if (editingRect != null) {
+          editingRect.SetCenter(editingRect.GetCenter() + delta);
         } else if (editingWall != null) {
           editingWall.SetStart(editingWall.GetStart() + delta);
           editingWall.SetEnd(editingWall.GetEnd() + delta);
@@ -196,7 +210,7 @@ namespace StackMaps {
         // They are treated differently, though.
         Vector2 delta = data.delta / canvasScale / uiScale;
 
-        if (editingObject != null) {
+        if (editingRect != null) {
           // Rotate and filter movement.
           delta = Quaternion.Euler(0, 0, -transform.localEulerAngles.z) * (Vector3)delta;
           delta.y = 0;
@@ -217,7 +231,7 @@ namespace StackMaps {
 
       resizeHandleR.dragHandler = data => {
         Vector2 delta = data.delta / canvasScale / uiScale;
-        if (editingObject != null) {
+        if (editingRect != null) {
           // Rotate and filter movement.
           delta = Quaternion.Euler(0, 0, -transform.localEulerAngles.z) * (Vector3)delta;
           delta.y = 0;
@@ -278,7 +292,7 @@ namespace StackMaps {
 
         float sign = Mathf.Sign(a2 - a1);
 
-        editingObject.SetRotation(editingObject.GetRotation() + sign * angleA);
+        editingRect.SetRotation(editingRect.GetRotation() + sign * angleA);
 
         UpdateTransform();
       };
@@ -294,7 +308,7 @@ namespace StackMaps {
     /// mxGTox is false and myGToy is true.
     /// </summary>
     void Resize(Vector2 delta, Vector2 movingPt, Vector2 oppositePt, bool mxGTox, bool myGToy) {
-      if (editingObject != null) {
+      if (editingRect != null) {
         Rect curr = ((RectTransform)transform).rect;
         curr.center = transform.localPosition;
 
@@ -311,8 +325,8 @@ namespace StackMaps {
                       Mathf.Max(p1.x, p2.x), Mathf.Max(p1.y, p2.y)
                     );
 
-        editingObject.SetCenter(rect.center);
-        editingObject.SetSize(rect.size);
+        editingRect.SetCenter(rect.center);
+        editingRect.SetSize(rect.size);
 
         // We need to update in such a way we allow negative width/height.
         // We also need to do a rotation. How much the center moved locally is
