@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using MaterialUI;
 using UnityEngine.EventSystems;
 
 namespace StackMaps {
@@ -33,6 +34,8 @@ namespace StackMaps {
     public TransformDrag resizeHandleBR;
 
     public Image translateHandleGraphics;
+
+    CanvasGroup canvasGroup;
 
     /// <summary>
     /// The current canvas scale. This is required since the screen-coordinates
@@ -104,7 +107,14 @@ namespace StackMaps {
         UpdateTransform();
       }
 
-      gameObject.SetActive(editingRect != null || editingWall != null);
+      if (canvasGroup == null) {
+        canvasGroup = GetComponent<CanvasGroup>();
+      }
+
+      canvasGroup.interactable = editingRect != null || editingWall != null;
+      float goal = canvasGroup.interactable? 1 : 0;
+      canvasGroup.blocksRaycasts = canvasGroup.interactable;
+      TweenManager.TweenFloat(v => canvasGroup.alpha = v, canvasGroup.alpha, goal, 0.15f);
     }
 
     /// <summary>
@@ -126,7 +136,7 @@ namespace StackMaps {
     /// <summary>
     /// Defines all handle actions.
     /// </summary>
-    void Start() {
+    void Awake() {
       shared = this;
       float uiScale = FindObjectOfType<Canvas>().scaleFactor;
 
