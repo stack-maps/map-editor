@@ -13,6 +13,9 @@ namespace StackMaps {
     /// </summary>
     public bool disableEditing;
 
+    /// <summary>
+    /// Gets the center in relative position to the canvas.
+    /// </summary>
     public Vector2 GetCenter() {
       return ((RectTransform)transform).anchoredPosition;
     }
@@ -37,6 +40,13 @@ namespace StackMaps {
       Vector3 angles = transform.localEulerAngles;
       angles.z = degrees;
       transform.localEulerAngles = angles;
+    }
+
+    public Rect GetRect() {
+      Vector2 c = GetCenter();
+      Vector2 s = GetSize();
+
+      return new Rect(c - s / 2, s);
     }
   }
 }

@@ -35,7 +35,7 @@ namespace StackMaps {
     /// </summary>
     /// <returns>The editing object.</returns>
     public GameObject GetEditingObject() {
-      return editingObject == null? null : editingObject.gameObject;
+      return editingObject == null ? null : editingObject.gameObject;
     }
 
     /// <summary>
@@ -46,12 +46,22 @@ namespace StackMaps {
         return;
       }
 
-      x1InputField.text = editingObject.GetStart().x.ToString();
-      y1InputField.text = editingObject.GetStart().y.ToString();
-      x2InputField.text = editingObject.GetEnd().x.ToString();
-      y2InputField.text = editingObject.GetEnd().y.ToString();
+      if (!x1InputField.isFocused)
+        x1InputField.text = editingObject.GetStart().x.ToString();
+
+      if (!y1InputField.isFocused)
+        y1InputField.text = editingObject.GetStart().y.ToString();
+
+      if (!x2InputField.isFocused)
+        x2InputField.text = editingObject.GetEnd().x.ToString();
+
+      if (!y2InputField.isFocused)
+        y2InputField.text = editingObject.GetEnd().y.ToString();
     }
 
+    void Update() {
+      PopulateObject();
+    }
 
     /// <summary>
     /// Updates the editing object with this editor's values.
@@ -65,6 +75,8 @@ namespace StackMaps {
         float.Parse(y1InputField.text)));
       editingObject.SetEnd(new Vector2(float.Parse(x2InputField.text),
         float.Parse(y2InputField.text)));
+
+      TransformEditor.shared.UpdateTransform();
     }
 
   }

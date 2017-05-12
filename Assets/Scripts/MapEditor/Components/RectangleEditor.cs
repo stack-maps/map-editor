@@ -40,7 +40,7 @@ namespace StackMaps {
     /// </summary>
     /// <returns>The editing object.</returns>
     public GameObject GetEditingObject() {
-      return editingObject == null? null : editingObject.gameObject;
+      return editingObject == null ? null : editingObject.gameObject;
     }
 
     /// <summary>
@@ -51,11 +51,24 @@ namespace StackMaps {
         return;
       }
 
-      xInputField.text = editingObject.GetCenter().x.ToString("F");
-      yInputField.text = editingObject.GetCenter().y.ToString("F");
-      widthInputField.text = editingObject.GetSize().x.ToString("F");
-      heightInputField.text = editingObject.GetSize().y.ToString("F");
-      rotationInputField.text = editingObject.GetRotation().ToString("F");
+      if (!xInputField.isFocused)
+        xInputField.text = editingObject.GetCenter().x.ToString("F");
+
+      if (!yInputField.isFocused)
+        yInputField.text = editingObject.GetCenter().y.ToString("F");
+
+      if (!widthInputField.isFocused)
+        widthInputField.text = editingObject.GetSize().x.ToString("F");
+
+      if (!heightInputField.isFocused)
+        heightInputField.text = editingObject.GetSize().y.ToString("F");
+
+      if (!rotationInputField.isFocused)
+        rotationInputField.text = editingObject.GetRotation().ToString("F");
+    }
+
+    void Update() {
+      PopulateObject();
     }
 
     /// <summary>
@@ -69,6 +82,9 @@ namespace StackMaps {
       editingObject.SetCenter(new Vector2(float.Parse(xInputField.text), float.Parse(yInputField.text)));
       editingObject.SetSize(new Vector2(float.Parse(widthInputField.text), float.Parse(heightInputField.text)));
       editingObject.SetRotation(float.Parse(rotationInputField.text));
+
+      // Also tell transform to update too
+      TransformEditor.shared.UpdateTransform();
     }
   }
 }
