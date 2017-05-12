@@ -245,8 +245,6 @@ namespace StackMaps {
     /// Processes a clicked game object.
     /// </summary>
     void ProcessSelection(GameObject clicked) {
-      Debug.Log(clicked);
-
       if (toolbarController.toolbar.GetActiveTool() != ToolType.SelectionTool) {
         clicked = null;
       }
