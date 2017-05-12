@@ -6,7 +6,7 @@ namespace StackMaps {
   /// This class represents an entire floor of a library. A floor of a library
   /// consists of aisles, aisle areas, walls, and a reference image.
   /// </summary>
-  public class Floor : MonoBehaviour {
+  public class Floor  {
     // All aisles not in an aisle area on this floor.
     public List<Aisle> aisles = new List<Aisle>();
 
@@ -20,5 +20,9 @@ namespace StackMaps {
 
     // The name of the floor, e.g. 1.
     public string floorName = "New Floor";
+
+    public string ToJSON() {
+      return "{}";
+    }
   }
 }

@@ -24,24 +24,9 @@ namespace StackMaps {
     public RectTransform previewLayer;
 
     /// <summary>
-    /// The list of aisles on this floor.
+    /// The data structure holding floor information, capable of serialization.
     /// </summary>
-    List<Aisle> aisles = new List<Aisle>();
-
-    /// <summary>
-    /// The list of aisle areas on this floor.
-    /// </summary>
-    List<AisleArea> aisleAreas = new List<AisleArea>();
-
-    /// <summary>
-    /// The list of walls on this floor.
-    /// </summary>
-    List<Wall> walls = new List<Wall>();
-
-    /// <summary>
-    /// The list of landmarks on this floor.
-    /// </summary>
-    List<Landmark> landmarks = new List<Landmark>();
+    Floor floor = new Floor();
 
     /// <summary>
     /// The preview object before creation.
@@ -78,7 +63,7 @@ namespace StackMaps {
         Landmark obj = Instantiate(landmarkPrefab, landmarkLayer);
         ((RectTransform)obj.transform).sizeDelta = rect.size;
         ((RectTransform)obj.transform).anchoredPosition = rect.center;
-        landmarks.Add(obj);
+        floor.landmarks.Add(obj);
         ClearPreview();
       }
     }
@@ -109,7 +94,7 @@ namespace StackMaps {
         AisleArea obj = Instantiate(aisleAreaPrefab, aisleAreaLayer);
         ((RectTransform)obj.transform).sizeDelta = rect.size;
         ((RectTransform)obj.transform).anchoredPosition = rect.center;
-        aisleAreas.Add(obj);
+        floor.aisleAreas.Add(obj);
         ClearPreview();
       }
     }
@@ -139,7 +124,7 @@ namespace StackMaps {
         // Clears the preview object.
         Aisle obj = Instantiate(aislePrefab, aisleLayer);
         t = obj.GetComponent<Rectangle>();
-        aisles.Add(obj);
+        floor.aisles.Add(obj);
         ClearPreview();
       }
 
@@ -175,7 +160,7 @@ namespace StackMaps {
       } else {
         // Clears the preview object.
         Wall obj = Instantiate(wallPrefab, wallLayer);
-        walls.Add(obj);
+        floor.walls.Add(obj);
         ClearPreview();
         obj.SetStart(begin);
         obj.SetEnd(end);
@@ -188,6 +173,14 @@ namespace StackMaps {
     public void ClearPreview() {
       if (previewObject != null)
         Destroy(previewObject.gameObject);
+    }
+
+    public void ImportFloor(string floorJSON) {
+      
+    }
+
+    public string ExportFloor() {
+      return floor.ToJSON();
     }
   }
 }

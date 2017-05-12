@@ -7,34 +7,34 @@ namespace StackMaps {
   /// This class tracks actions performed by the user and provides undo and redo
   /// functionalities.
   ///
-  /// How this class works: for each undoable action in the code, we push
-  /// function stubs that specify both how to execute it, and how to rewind it.
-  /// Undo and redo come naturally from the stack of actions we keep.
+  /// How this class works: we snapshot the entire floor's state for each action
+  /// and restore the state as needed.
   /// </summary>
   public class ActionManager : MonoBehaviour {
-    readonly List<Action> actions = new List<Action>();
+    readonly List<string> states = new List<string>();
 
     int index = -1;
 
     public static ActionManager shared;
+
+    public FloorController floorController;
 
     void Awake() {
       shared = this;
     }
 
     /// <summary>
-    /// Pushes the action to the stack. Also performs it immediately.
+    /// Snapshots the current floor.
     /// </summary>
     /// <param name="action">Action to do.</param>
-    public void PushAction(Action action) {
+    public void Push() {
       index++;
 
-      while (index < actions.Count) {
-        actions.RemoveAt(index);
+      while (index < states.Count) {
+        states.RemoveAt(index);
       }
 
-      actions.Add(action);
-      action.currentAction();
+      states.Add(floorController.ExportFloor());
     }
 
     /// <summary>
@@ -45,7 +45,7 @@ namespace StackMaps {
         return;
       }
 
-      actions[index].restoreAction();
+      floorController.ImportFloor(states[index]);
       index--;
     }
 
@@ -58,7 +58,7 @@ namespace StackMaps {
       }
 
       index++;
-      actions[index].currentAction();
+      floorController.ImportFloor(states[index]);
     }
 
     /// <summary>
@@ -72,7 +72,7 @@ namespace StackMaps {
     /// Determines whether redo is available.
     /// </summary>
     public bool CanRedo() {
-      return index + 1 < actions.Count;
+      return index + 1 < states.Count;
     }
   }
 }
