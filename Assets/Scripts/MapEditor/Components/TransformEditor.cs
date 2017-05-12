@@ -123,9 +123,10 @@ namespace StackMaps {
     /// </summary>
     void Start() {
       shared = this;
+      float uiScale = FindObjectOfType<Canvas>().scaleFactor;
 
       translationHandle.dragHandler = data => {
-        Vector2 delta = data.delta / canvasScale / FindObjectOfType<Canvas>().scaleFactor;
+        Vector2 delta = data.delta / canvasScale / uiScale;
 
         if (editingObject != null) {
           editingObject.SetCenter(editingObject.GetCenter() + delta);
@@ -150,7 +151,7 @@ namespace StackMaps {
 
       resizeHandleTL.dragHandler = data => {
         // Rotate
-        Vector2 delta = Quaternion.Euler(0, 0, -transform.localEulerAngles.z) * data.delta / canvasScale;
+        Vector2 delta = Quaternion.Euler(0, 0, -transform.localEulerAngles.z) * data.delta / canvasScale / uiScale;
 
         Rect r = ((RectTransform)transform).rect;
         r.center = transform.localPosition;
@@ -160,7 +161,7 @@ namespace StackMaps {
       };
 
       resizeHandleTR.dragHandler = data => {
-        Vector2 delta = Quaternion.Euler(0, 0, -transform.localEulerAngles.z) * data.delta / canvasScale;
+        Vector2 delta = Quaternion.Euler(0, 0, -transform.localEulerAngles.z) * data.delta / canvasScale / uiScale;
 
         Rect r = ((RectTransform)transform).rect;
         r.center = transform.localPosition;
@@ -170,7 +171,7 @@ namespace StackMaps {
       };
 
       resizeHandleBL.dragHandler = data => {
-        Vector2 delta = Quaternion.Euler(0, 0, -transform.localEulerAngles.z) * data.delta / canvasScale;
+        Vector2 delta = Quaternion.Euler(0, 0, -transform.localEulerAngles.z) * data.delta / canvasScale / uiScale;
 
         Rect r = ((RectTransform)transform).rect;
         r.center = transform.localPosition;
@@ -180,7 +181,7 @@ namespace StackMaps {
       };
 
       resizeHandleBR.dragHandler = data => {
-        Vector2 delta = Quaternion.Euler(0, 0, -transform.localEulerAngles.z) * data.delta / canvasScale;
+        Vector2 delta = Quaternion.Euler(0, 0, -transform.localEulerAngles.z) * data.delta / canvasScale / uiScale;
 
         Rect r = ((RectTransform)transform).rect;
         r.center = transform.localPosition;
@@ -191,7 +192,7 @@ namespace StackMaps {
 
       resizeHandleL.dragHandler = data => {
         // Rotate and filter move amount.
-        Vector2 delta = Quaternion.Euler(0, 0, -transform.localEulerAngles.z) * data.delta / canvasScale;
+        Vector2 delta = Quaternion.Euler(0, 0, -transform.localEulerAngles.z) * data.delta / canvasScale / uiScale;
         delta.y = 0;
 
         Rect r = ((RectTransform)transform).rect;
@@ -204,7 +205,7 @@ namespace StackMaps {
       };
 
       resizeHandleT.dragHandler = data => {
-        Vector2 delta = Quaternion.Euler(0, 0, -transform.localEulerAngles.z) * data.delta / canvasScale;
+        Vector2 delta = Quaternion.Euler(0, 0, -transform.localEulerAngles.z) * data.delta / canvasScale / uiScale;
         delta.x = 0;
 
         Rect r = ((RectTransform)transform).rect;
@@ -215,7 +216,7 @@ namespace StackMaps {
       };
 
       resizeHandleB.dragHandler = data => {
-        Vector2 delta = Quaternion.Euler(0, 0, -transform.localEulerAngles.z) * data.delta / canvasScale;
+        Vector2 delta = Quaternion.Euler(0, 0, -transform.localEulerAngles.z) * data.delta / canvasScale / uiScale;
         delta.x = 0;
 
         Rect r = ((RectTransform)transform).rect;
@@ -226,7 +227,7 @@ namespace StackMaps {
       };
 
       resizeHandleR.dragHandler = data => {
-        Vector2 delta = Quaternion.Euler(0, 0, -transform.localEulerAngles.z) * data.delta / canvasScale;
+        Vector2 delta = Quaternion.Euler(0, 0, -transform.localEulerAngles.z) * data.delta / canvasScale / uiScale;
         delta.y = 0;
 
         Rect r = ((RectTransform)transform).rect;
@@ -234,6 +235,32 @@ namespace StackMaps {
         Vector2 movingPt = new Vector2(r.xMax, r.yMin);
         Vector2 oppositePt = new Vector2(r.xMin, r.yMax);
         Resize(delta, movingPt, oppositePt, true, false);
+      };
+
+      // Rotation shouldn't be too hard. We just want to rotate depending on a
+      // delta angle as seen from the center of the object.
+      rotationHandle.dragHandler = data => {
+        // Use sine rule to figure out delta angle. Go draw a diagram!
+        Vector2 ptA = transform.position;
+        Vector2 ptB = data.position;
+        Vector2 ptC = data.position - data.delta;
+
+        float sideA = (ptB - ptC).magnitude;
+        float sideB = (ptA - ptC).magnitude;
+
+        float angleB = Vector2.Angle(ptC - ptB, ptA - ptB);
+
+        float angleA = Mathf.Asin(sideA * Mathf.Sin(angleB * Mathf.Deg2Rad) / sideB) * Mathf.Rad2Deg;
+
+        // Still needs to determine sign of this rotation!
+        float a1 = Mathf.Atan2((ptB - ptA).x, (ptB - ptA).y);
+        float a2 = Mathf.Atan2((ptC - ptA).x, (ptC - ptA).y);
+
+        float sign = Mathf.Sign(a2 - a1);
+
+        editingObject.SetRotation(editingObject.GetRotation() + sign * angleA);
+
+        UpdateTransform();
       };
     }
 
