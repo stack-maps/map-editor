@@ -52,6 +52,7 @@ namespace StackMaps {
     public void SetEditingObject(GameObject obj) {
       if (obj == null) {
         editingObject = null;
+        editingWall = null;
       } else {
         editingObject = obj.GetComponent<Rectangle>();
         editingWall = obj.GetComponent<Wall>();
@@ -64,8 +65,6 @@ namespace StackMaps {
     /// Depending on which object we are editing, we switch visibility modes.
     /// </summary>
     void SwitchMode() {
-      gameObject.SetActive(editingObject != null || editingWall != null);
-
       if (editingObject != null) {
         
         rotationHandle.gameObject.SetActive(true);
@@ -100,6 +99,8 @@ namespace StackMaps {
         // Set up the editor size for once.
         UpdateTransform();
       }
+
+      gameObject.SetActive(editingObject != null || editingWall != null);
     }
 
     /// <summary>
@@ -191,17 +192,46 @@ namespace StackMaps {
       };
 
       resizeHandleL.dragHandler = data => {
-        // Rotate and filter move amount.
-        Vector2 delta = Quaternion.Euler(0, 0, -transform.localEulerAngles.z) * data.delta / canvasScale / uiScale;
-        delta.y = 0;
+        // Now two things. This handle (and R) is active for both wall and rect.
+        // They are treated differently, though.
+        Vector2 delta = data.delta / canvasScale / uiScale;
 
-        Rect r = ((RectTransform)transform).rect;
-        r.center = transform.localPosition;
-        // For the single direction movement, this is fine, even though moving
-        // point isn't exactly the handle.
-        Vector2 movingPt = new Vector2(r.xMin, r.yMax);
-        Vector2 oppositePt = new Vector2(r.xMax, r.yMin);
-        Resize(delta, movingPt, oppositePt, false, true);
+        if (editingObject != null) {
+          // Rotate and filter movement.
+          delta = Quaternion.Euler(0, 0, -transform.localEulerAngles.z) * (Vector3)delta;
+          delta.y = 0;
+
+          Rect r = ((RectTransform)transform).rect;
+          r.center = transform.localPosition;
+          // For the single direction movement, this is fine, even though moving
+          // point isn't exactly the handle.
+          Vector2 movingPt = new Vector2(r.xMin, r.yMax);
+          Vector2 oppositePt = new Vector2(r.xMax, r.yMin);
+          Resize(delta, movingPt, oppositePt, false, true);
+        } else if (editingWall != null) {
+          // We just call set method. And we are done!
+          editingWall.SetStart(editingWall.GetStart() + delta);
+          UpdateTransform();
+        }
+      };
+
+      resizeHandleR.dragHandler = data => {
+        Vector2 delta = data.delta / canvasScale / uiScale;
+        if (editingObject != null) {
+          // Rotate and filter movement.
+          delta = Quaternion.Euler(0, 0, -transform.localEulerAngles.z) * (Vector3)delta;
+          delta.y = 0;
+
+          Rect r = ((RectTransform)transform).rect;
+          r.center = transform.localPosition;
+          Vector2 movingPt = new Vector2(r.xMax, r.yMin);
+          Vector2 oppositePt = new Vector2(r.xMin, r.yMax);
+          Resize(delta, movingPt, oppositePt, true, false);
+        } else if (editingWall != null) {
+          // We just call set method. And we are done!
+          editingWall.SetEnd(editingWall.GetEnd() + delta);
+          UpdateTransform();
+        }
       };
 
       resizeHandleT.dragHandler = data => {
@@ -226,16 +256,6 @@ namespace StackMaps {
         Resize(delta, movingPt, oppositePt, false, false);
       };
 
-      resizeHandleR.dragHandler = data => {
-        Vector2 delta = Quaternion.Euler(0, 0, -transform.localEulerAngles.z) * data.delta / canvasScale / uiScale;
-        delta.y = 0;
-
-        Rect r = ((RectTransform)transform).rect;
-        r.center = transform.localPosition;
-        Vector2 movingPt = new Vector2(r.xMax, r.yMin);
-        Vector2 oppositePt = new Vector2(r.xMin, r.yMax);
-        Resize(delta, movingPt, oppositePt, true, false);
-      };
 
       // Rotation shouldn't be too hard. We just want to rotate depending on a
       // delta angle as seen from the center of the object.
