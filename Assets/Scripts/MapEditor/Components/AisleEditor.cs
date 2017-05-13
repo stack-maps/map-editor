@@ -101,6 +101,13 @@ namespace StackMaps {
 
       if (changed) {
         ActionManager.shared.Push();
+
+        foreach (CallNumberRangeEditor editor in rangeEditors) {
+          CanvasGroup g = editor.sideDropdown.GetComponent<CanvasGroup>();
+          g.interactable = !editingObject.singleSided;
+          //g.blocksRaycasts = editingObject.singleSided;
+          TweenManager.TweenFloat(v => g.alpha = v, g.alpha, editingObject.singleSided ? 0 : 1, 0.3f);
+        }
       }
     }
 
