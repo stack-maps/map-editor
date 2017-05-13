@@ -79,9 +79,19 @@ namespace StackMaps {
         return;
       }
 
-      editingObject.SetCenter(new Vector2(float.Parse(xInputField.text), float.Parse(yInputField.text)));
-      editingObject.SetSize(new Vector2(float.Parse(widthInputField.text), float.Parse(heightInputField.text)));
-      editingObject.SetRotation(float.Parse(rotationInputField.text));
+      Vector2 newCenter = new Vector2(float.Parse(xInputField.text), float.Parse(yInputField.text));
+      Vector2 newSize = new Vector2(float.Parse(widthInputField.text), float.Parse(heightInputField.text));
+      float newRotation = float.Parse(rotationInputField.text);
+      bool changed = !((newCenter - editingObject.GetCenter()).magnitude < 0.01f &&
+                     (newSize - editingObject.GetSize()).magnitude < 0.01f &&
+                     Mathf.Abs(newRotation - editingObject.GetRotation()) < 0.01f);
+      editingObject.SetCenter(newCenter);
+      editingObject.SetSize(newSize);
+      editingObject.SetRotation(newRotation);
+
+      if (changed) {
+        ActionManager.shared.Push();
+      }
 
       // Also tell transform to update too
       TransformEditor.shared.UpdateTransform();

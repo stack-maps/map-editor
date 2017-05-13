@@ -81,6 +81,7 @@ namespace StackMaps {
       }
 
       landmarkType = t;
+      Update();
 
       name = "(" + ActionManager.shared.index + ")" + r.GetHashCode();
     }

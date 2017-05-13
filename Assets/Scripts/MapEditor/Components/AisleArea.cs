@@ -62,8 +62,8 @@ namespace StackMaps {
       r.SetRotation(root["rotation"].AsFloat);
 
       foreach (JSONNode node in root["Aisle"].AsArray) {
-        Aisle aisle = api.CreateAisle(Rect.zero, false);
-        aisle.transform.parent = container;
+        Aisle aisle = api.CreateAisle(Rect.zero, false, true);
+        aisle.transform.SetParent(container, false);
         aisle.FromJSON(api, node);
       }
 

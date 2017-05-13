@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using MaterialUI;
+using System;
 
 namespace StackMaps {
   /// <summary>
@@ -157,8 +158,16 @@ namespace StackMaps {
       end.SetCutter1(endCutter1InputField.inputField.text);
       end.SetCutter2(endCutter2InputField.inputField.text);
 
+      // Check if there is any change
+      bool changed = !(begin.ToString().Equals(editingObject.GetBegin().ToString()) &&
+                     end.ToString().Equals(editingObject.GetEnd().ToString()));
+
       allValid &= editingObject.SetBegin(begin);
       allValid &= editingObject.SetEnd(end);
+
+      if (changed) {
+        ActionManager.shared.Push();
+      }
 
       warningIcon.gameObject.SetActive(!allValid);
     }
