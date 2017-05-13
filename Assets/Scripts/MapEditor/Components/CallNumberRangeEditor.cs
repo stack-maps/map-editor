@@ -12,14 +12,8 @@ namespace StackMaps {
   public class CallNumberRangeEditor : SidebarElement {
     CallNumberRange editingObject;
 
-    public MaterialInputField startClassInputField;
-    public MaterialInputField endClassInputField;
-    public MaterialInputField startSubclassInputField;
-    public MaterialInputField endSubclassInputField;
-    public MaterialInputField startCutter1InputField;
-    public MaterialInputField endCutter1InputField;
-    public MaterialInputField startCutter2InputField;
-    public MaterialInputField endCutter2InputField;
+    public MaterialInputField startInputField;
+    public MaterialInputField endInputField;
 
     public VectorImage warningIcon;
 
@@ -77,14 +71,8 @@ namespace StackMaps {
         return;
       }
 
-      startClassInputField.inputField.text = editingObject.GetBegin().GetClass();
-      startSubclassInputField.inputField.text = editingObject.GetBegin().GetSubclass();
-      startCutter1InputField.inputField.text = editingObject.GetBegin().GetCutter1();
-      startCutter2InputField.inputField.text = editingObject.GetBegin().GetCutter2();
-      endClassInputField.inputField.text = editingObject.GetEnd().GetClass();
-      endSubclassInputField.inputField.text = editingObject.GetEnd().GetSubclass();
-      endCutter1InputField.inputField.text = editingObject.GetEnd().GetCutter1();
-      endCutter2InputField.inputField.text = editingObject.GetEnd().GetCutter2();
+      startInputField.inputField.text = editingObject.GetBegin().ToString();
+      endInputField.inputField.text = editingObject.GetEnd().ToString();
 
       // TODO: this part seems a bit ugly. Can we do better here?
       int i = -1;
@@ -131,14 +119,8 @@ namespace StackMaps {
       // We check if all fields are properly set up. If not we don't update the
       // ranges.
       bool allValid = true;
-      allValid &= !startClassInputField.validationText.isActiveAndEnabled;
-      allValid &= !endClassInputField.validationText.isActiveAndEnabled;
-      allValid &= !startSubclassInputField.validationText.isActiveAndEnabled;
-      allValid &= !endSubclassInputField.validationText.isActiveAndEnabled;
-      allValid &= !startCutter1InputField.validationText.isActiveAndEnabled;
-      allValid &= !endCutter1InputField.validationText.isActiveAndEnabled;
-      allValid &= !startCutter2InputField.validationText.isActiveAndEnabled;
-      allValid &= !endCutter2InputField.validationText.isActiveAndEnabled;
+      allValid &= !startInputField.validationText.isActiveAndEnabled;
+      allValid &= !endInputField.validationText.isActiveAndEnabled;
 
       if (!allValid) {
         return;
@@ -146,17 +128,8 @@ namespace StackMaps {
 
       // This is called every single time we edit the field.
       // We want to create new call numbers each time, to validate the input.
-      CallNumber begin = new CallNumber();
-      begin.SetClass(startClassInputField.inputField.text);
-      begin.SetSubclass(startSubclassInputField.inputField.text);
-      begin.SetCutter1(startCutter1InputField.inputField.text);
-      begin.SetCutter2(startCutter2InputField.inputField.text);
-
-      CallNumber end = new CallNumber();
-      end.SetClass(endClassInputField.inputField.text);
-      end.SetSubclass(endSubclassInputField.inputField.text);
-      end.SetCutter1(endCutter1InputField.inputField.text);
-      end.SetCutter2(endCutter2InputField.inputField.text);
+      CallNumber begin = new CallNumber(startInputField.inputField.text);
+      CallNumber end = new CallNumber(endInputField.inputField.text);
 
       // Check if there is any change
       bool changed = !(begin.ToString().Equals(editingObject.GetBegin().ToString()) &&
@@ -165,7 +138,7 @@ namespace StackMaps {
       allValid &= editingObject.SetBegin(begin);
       allValid &= editingObject.SetEnd(end);
 
-      if (changed) {
+      if (allValid && changed) {
         ActionManager.shared.Push();
       }
 

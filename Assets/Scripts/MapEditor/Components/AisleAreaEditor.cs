@@ -57,10 +57,10 @@ namespace StackMaps {
       bool newVal = orientationDropdown.currentlySelected == 0;
       bool changed = editingObject.IsHorizontal() != newVal;
 
-      editingObject.SetHorizontal(newVal);
-
       if (changed) {
+        editingObject.Flip();
         ActionManager.shared.Push();
+        TransformEditor.shared.UpdateTransform();
       }
     }
 

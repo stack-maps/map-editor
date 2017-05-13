@@ -123,7 +123,8 @@ namespace StackMaps {
     /// <param name="rect">Dimensions of the aisle.</param>
     /// <param name = "preview">Whether this is only a preview of the real object.</param>
     /// <param name = "isUndoRedo">Is this creation a result of undo/redo?</param>
-    public Aisle CreateAisle(Rect rect, bool preview, bool isUndoRedo = false) {
+    /// <param name = "insideAisleArea">Inside an aisle area?</param>
+    public Aisle CreateAisle(Rect rect, bool preview, bool isUndoRedo = false, bool insideAisleArea = false) {
       Aisle obj = null;
 
       if (preview) {
@@ -147,7 +148,10 @@ namespace StackMaps {
         // Clears the preview object.
         obj = Instantiate(aislePrefab, aisleLayer);
         Rectangle t = obj.GetComponent<Rectangle>();
-        floor.aisles.Add(obj);
+
+        if (!insideAisleArea)
+          floor.aisles.Add(obj);
+
         ClearPreview();
 
         bool shouldRotate = rect.width > rect.height;
