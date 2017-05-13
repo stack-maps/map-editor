@@ -50,13 +50,17 @@ namespace StackMaps {
       root["call-range"] = new JSONArray();
 
       foreach (CallNumberRange range in callNumberRanges) {
-        root["call-range"].Add(range.ToJSON());
+        JSONNode rangeNode = range.ToJSON();
+        root["call-range"].Add(rangeNode);
       }
 
       return root;
     }
 
     public void FromJSON(FloorController api, JSONNode root) {
+
+      Debug.Log(root);
+
       Rectangle r = GetComponent<Rectangle>();
       r.SetCenter(new Vector2(root["center_x"].AsFloat, root["center_y"].AsFloat));
       r.SetSize(new Vector2(root["length"].AsFloat, root["width"].AsFloat));
@@ -64,7 +68,10 @@ namespace StackMaps {
       singleSided = root["sides"] == 1;
       callNumberRanges.Clear();
 
+      Debug.Log(root["call-range"]);
+
       foreach (JSONNode node in root["call-range"].AsArray) {
+        Debug.Log(node);
         CallNumberRange range = new CallNumberRange();
         range.FromJSON(api, node);
         callNumberRanges.Add(range);

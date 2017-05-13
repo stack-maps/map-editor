@@ -123,7 +123,6 @@ namespace StackMaps {
     /// <param name = "preview">Whether this is only a preview of the real object.</param>
     /// <param name = "isUndoRedo">Is this creation a result of undo/redo?</param>
     public Aisle CreateAisle(Rect rect, bool preview, bool isUndoRedo = false) {
-      Rectangle t;
       Aisle obj = null;
 
       if (preview) {
@@ -138,13 +137,22 @@ namespace StackMaps {
           previewObject.alpha = 0.5f;
         }
 
-        t = previewObject.GetComponent<Rectangle>();
+        Rectangle t = previewObject.GetComponent<Rectangle>();
+        bool shouldRotate = rect.width > rect.height;
+        t.SetRotation(shouldRotate ? 90 : 0);
+        t.SetSize(shouldRotate ? new Vector2(rect.height, rect.width) : rect.size);
+        t.SetCenter(rect.center);
       } else {
         // Clears the preview object.
         obj = Instantiate(aislePrefab, aisleLayer);
-        t = obj.GetComponent<Rectangle>();
+        Rectangle t = obj.GetComponent<Rectangle>();
         floor.aisles.Add(obj);
         ClearPreview();
+
+        bool shouldRotate = rect.width > rect.height;
+        t.SetRotation(shouldRotate ? 90 : 0);
+        t.SetSize(shouldRotate ? new Vector2(rect.height, rect.width) : rect.size);
+        t.SetCenter(rect.center);
 
         if (!isUndoRedo)
           ActionManager.shared.Push();
@@ -152,11 +160,6 @@ namespace StackMaps {
 
       // Resize - we do something more here. We want to rotate the aisle
       // depending on whichever side is longer.
-      bool shouldRotate = rect.width > rect.height;
-      t.SetRotation(shouldRotate? 90 : 0);
-      t.SetSize(shouldRotate? new Vector2(rect.height, rect.width) : rect.size);
-      t.SetCenter(rect.center);
-
       return obj;
     }
 
@@ -207,7 +210,22 @@ namespace StackMaps {
         Destroy(previewObject.gameObject);
     }
 
+    /// <summary>
+    /// Deletes the given object from the floor.
+    /// </summary>
+    /// <param name="obj">Object to delete.</param>
+    public void DeleteObject(GameObject obj) {
+      floor.aisles.Remove(obj.GetComponent<Aisle>());
+      floor.aisleAreas.Remove(obj.GetComponent<AisleArea>());
+      floor.walls.Remove(obj.GetComponent<Wall>());
+      floor.landmarks.Remove(obj.GetComponent<Landmark>());
+    }
+
     public void ImportFloor(string floorJSON) {
+      Debug.Log("IMPORT: " + floorJSON);
+      JSONNode root = JSONNode.Parse(floorJSON);
+      Debug.Log("Parsed: " + root.ToString());
+
       // Delete everything.
       for (int i = 0; i < aisleLayer.childCount; i++) {
         Destroy(aisleLayer.GetChild(i).gameObject);
@@ -225,11 +243,14 @@ namespace StackMaps {
         Destroy(landmarkLayer.GetChild(i).gameObject);
       }
 
-      floor.FromJSON(this, JSONNode.Parse(floorJSON));
+      floor.FromJSON(this, root);
     }
 
     public string ExportFloor() {
-      return floor.ToJSON().ToString();
+      JSONNode node = floor.ToJSON();
+      Debug.Log("EXPORT: " + node.ToString());
+
+      return node.ToString();
     }
   }
 }

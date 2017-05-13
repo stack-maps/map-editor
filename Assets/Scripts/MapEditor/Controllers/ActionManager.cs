@@ -38,6 +38,7 @@ namespace StackMaps {
       }
 
       states.Add(floorController.ExportFloor());
+      // Debug.Log(states[index]);
     }
 
     /// <summary>

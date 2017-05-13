@@ -272,8 +272,10 @@ namespace StackMaps {
         return;
       }
 
-      Destroy(selectedObject.gameObject);
+      floorController.DeleteObject(selectedObject);
       ProcessSelection(null);
+
+      ActionManager.shared.Push();
     }
 
     /// <summary>

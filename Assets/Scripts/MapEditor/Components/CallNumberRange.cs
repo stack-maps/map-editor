@@ -69,7 +69,7 @@ namespace StackMaps {
 
     public JSONNode ToJSON() {
       JSONObject root = new JSONObject();
-      root["collection"] = collection;
+      root["collection"] = collection ?? "";
       root["callstart"] = begin.ToString();
       root["callend"] = end.ToString();
       root["side"] = isSideA ? 0 : 1;
@@ -78,10 +78,13 @@ namespace StackMaps {
     }
 
     public void FromJSON(FloorController api, JSONNode root) {
-      collection = root["collection"];
+      Debug.Log(root);
+      collection = root["collection"] ?? "";
       begin = new CallNumber(root["callstart"]);
       end = new CallNumber(root["callend"]);
       isSideA = root["side"].AsInt == 0;
+
+      Debug.Log("Callnumbers: " + begin + ", " + end);
     }
   }
 }
