@@ -219,6 +219,8 @@ namespace StackMaps {
       floor.aisleAreas.Remove(obj.GetComponent<AisleArea>());
       floor.walls.Remove(obj.GetComponent<Wall>());
       floor.landmarks.Remove(obj.GetComponent<Landmark>());
+
+      Destroy(obj);
     }
 
     public void ImportFloor(string floorJSON) {
