@@ -76,8 +76,11 @@ namespace StackMaps {
       try {
         t = (LandmarkType)Enum.Parse(typeof(LandmarkType), root["lname"]);
       } catch (ArgumentException ex) {
+        Debug.LogWarning("Bad landmark type loaded! " + ex.Message);
         t = LandmarkType.Restroom;
       }
+
+      landmarkType = t;
     }
   }
 }

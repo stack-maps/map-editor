@@ -43,7 +43,8 @@ namespace StackMaps {
     /// </summary>
     /// <param name="rect">Dimensions of the landmark.</param>
     /// <param name = "preview">Whether this is only a preview of the real object.</param>
-    public Landmark CreateLandmark(Rect rect, bool preview) {
+    /// <param name = "isUndoRedo">Is this creation a result of undo/redo?</param>
+    public Landmark CreateLandmark(Rect rect, bool preview, bool isUndoRedo = false) {
       if (preview) {
         // Destroys preview if it is of a different type
         if (previewObject != null && previewObject.GetComponent<Landmark>() == null) {
@@ -69,6 +70,9 @@ namespace StackMaps {
         floor.landmarks.Add(obj);
         ClearPreview();
 
+        if (!isUndoRedo)
+          ActionManager.shared.Push();
+
         return obj;
       }
     }
@@ -78,7 +82,8 @@ namespace StackMaps {
     /// </summary>
     /// <param name="rect">Dimensions of the aisle area.</param>
     /// <param name = "preview">Whether this is only a preview of the real object.</param>
-    public AisleArea CreateAisleArea(Rect rect, bool preview) {
+    /// <param name = "isUndoRedo">Is this creation a result of undo/redo?</param>
+    public AisleArea CreateAisleArea(Rect rect, bool preview, bool isUndoRedo = false) {
       if (preview) {
         // Destroys preview if it is of a different type
         if (previewObject != null && previewObject.GetComponent<AisleArea>() == null) {
@@ -104,6 +109,9 @@ namespace StackMaps {
         floor.aisleAreas.Add(obj);
         ClearPreview();
 
+        if (!isUndoRedo)
+          ActionManager.shared.Push();
+
         return obj;
       }
     }
@@ -113,7 +121,8 @@ namespace StackMaps {
     /// </summary>
     /// <param name="rect">Dimensions of the aisle.</param>
     /// <param name = "preview">Whether this is only a preview of the real object.</param>
-    public Aisle CreateAisle(Rect rect, bool preview) {
+    /// <param name = "isUndoRedo">Is this creation a result of undo/redo?</param>
+    public Aisle CreateAisle(Rect rect, bool preview, bool isUndoRedo = false) {
       Rectangle t;
       Aisle obj = null;
 
@@ -136,6 +145,9 @@ namespace StackMaps {
         t = obj.GetComponent<Rectangle>();
         floor.aisles.Add(obj);
         ClearPreview();
+
+        if (!isUndoRedo)
+          ActionManager.shared.Push();
       }
 
       // Resize - we do something more here. We want to rotate the aisle
@@ -154,7 +166,8 @@ namespace StackMaps {
     /// <param name="begin">Begin.</param>
     /// <param name="end">End.</param>
     /// <param name="preview">If set to <c>true</c> preview.</param>
-    public Wall CreateWall(Vector2 begin, Vector2 end, bool preview) {
+    /// <param name = "isUndoRedo">Is this creation a result of undo/redo?</param>
+    public Wall CreateWall(Vector2 begin, Vector2 end, bool preview, bool isUndoRedo = false) {
       if (preview) {
         // Destroys preview if it is of a different type
         if (previewObject != null && previewObject.GetComponent<Wall>() == null) {
@@ -179,6 +192,9 @@ namespace StackMaps {
         obj.SetStart(begin);
         obj.SetEnd(end);
 
+        if (!isUndoRedo)
+          ActionManager.shared.Push();
+
         return obj;
       }
     }
@@ -192,11 +208,28 @@ namespace StackMaps {
     }
 
     public void ImportFloor(string floorJSON) {
+      // Delete everything.
+      for (int i = 0; i < aisleLayer.childCount; i++) {
+        Destroy(aisleLayer.GetChild(i).gameObject);
+      }
+
+      for (int i = 0; i < aisleAreaLayer.childCount; i++) {
+        Destroy(aisleAreaLayer.GetChild(i).gameObject);
+      }
+
+      for (int i = 0; i < wallLayer.childCount; i++) {
+        Destroy(wallLayer.GetChild(i).gameObject);
+      }
+
+      for (int i = 0; i < landmarkLayer.childCount; i++) {
+        Destroy(landmarkLayer.GetChild(i).gameObject);
+      }
+
       floor.FromJSON(this, JSONNode.Parse(floorJSON));
     }
 
     public string ExportFloor() {
-      return floor.ToJSONNode().ToString();
+      return floor.ToJSON().ToString();
     }
   }
 }

@@ -13,7 +13,7 @@ namespace StackMaps {
   public class ActionManager : MonoBehaviour {
     readonly List<string> states = new List<string>();
 
-    int index = -1;
+    public int index = -1;
 
     public static ActionManager shared;
 
@@ -23,10 +23,13 @@ namespace StackMaps {
       shared = this;
     }
 
+    void Start() {
+      Push();
+    }
+
     /// <summary>
     /// Snapshots the current floor.
     /// </summary>
-    /// <param name="action">Action to do.</param>
     public void Push() {
       index++;
 
@@ -45,8 +48,8 @@ namespace StackMaps {
         return;
       }
 
-      floorController.ImportFloor(states[index]);
       index--;
+      floorController.ImportFloor(states[index]);
     }
 
     /// <summary>
@@ -65,7 +68,7 @@ namespace StackMaps {
     /// Determines whether undo is available.
     /// </summary>
     public bool CanUndo() {
-      return index >= 0;
+      return index > 0;
     }
 
     /// <summary>

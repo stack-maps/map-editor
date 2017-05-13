@@ -66,7 +66,7 @@ namespace StackMaps {
       }
 
       foreach (Landmark landmark in landmarks) {
-        root["Landmark"].Add(landmark.ToJSON));
+        root["Landmark"].Add(landmark.ToJSON());
       }
 
       return root;
@@ -89,22 +89,22 @@ namespace StackMaps {
       landmarks.Clear();
 
       foreach (JSONObject obj in root["Aisle"].AsArray) {
-        Aisle aisle = api.CreateAisle(Rect.zero, false);
+        Aisle aisle = api.CreateAisle(Rect.zero, false, true);
         aisle.FromJSON(api, obj);
       }
 
       foreach (JSONObject obj in root["AisleArea"].AsArray) {
-        AisleArea aisleArea = api.CreateAisleArea(Rect.zero, false);
+        AisleArea aisleArea = api.CreateAisleArea(Rect.zero, false, true);
         aisleArea.FromJSON(api, obj);
       }
 
       foreach (JSONObject obj in root["Wall"].AsArray) {
-        Wall wall = api.CreateWall(Vector2.zero, Vector2.zero, false);
+        Wall wall = api.CreateWall(Vector2.zero, Vector2.zero, false, true);
         wall.FromJSON(api, obj);
       }
 
       foreach (JSONObject obj in root["Landmark"].AsArray) {
-        Landmark landmark = api.CreateLandmark(Rect.zero, false);
+        Landmark landmark = api.CreateLandmark(Rect.zero, false, true);
         landmark.FromJSON(api, obj);
       }
     }

@@ -106,6 +106,10 @@ namespace StackMaps {
     /// separated by a space. There are maximally 4 parts.
     /// </summary>
     public CallNumber(string stringRep) {
+      if (String.IsNullOrEmpty(stringRep)) {
+        return;
+      }
+
       string[] parts = stringRep.Split(' ');
 
       if (parts.Length > 0)
@@ -246,7 +250,7 @@ namespace StackMaps {
       return cnCutter2.Length > 0;
     }
 
-    public string ToString() {
+    public override string ToString() {
       string s = cnClass;
 
       if (HasSubclass()) {
