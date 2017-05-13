@@ -78,13 +78,10 @@ namespace StackMaps {
     }
 
     public void FromJSON(FloorController api, JSONNode root) {
-      Debug.Log(root);
       collection = root["collection"] ?? "";
       begin = new CallNumber(root["callstart"]);
       end = new CallNumber(root["callend"]);
       isSideA = root["side"].AsInt == 0;
-
-      Debug.Log("Callnumbers: " + begin + ", " + end);
     }
   }
 }

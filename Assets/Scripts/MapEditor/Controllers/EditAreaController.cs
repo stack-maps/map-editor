@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
+using System;
 
 namespace StackMaps {
   /// <summary>
@@ -37,8 +38,15 @@ namespace StackMaps {
     bool dragInitiated;
 
     // Selection tool
-    GameObject selectedObject;
+    public GameObject _selectedObject;
 
+    GameObject GetSelectedObject() {
+      return _selectedObject;
+    }
+
+    void SetSelectedObject(GameObject obj) {
+      _selectedObject = obj;
+    }
 
     // Use this for initialization
     void Start() {
@@ -60,7 +68,7 @@ namespace StackMaps {
 
       // Tool-related updates
       ProcessInputForTools();
-      toolbarController.toolbar.deleteButton.interactable = selectedObject != null;
+      toolbarController.toolbar.deleteButton.interactable = GetSelectedObject() != null;
 
       if (toolbarController.toolbar.GetActiveTool() != ToolType.SelectionTool) {
         // Unselect if we changed tool.
@@ -250,29 +258,29 @@ namespace StackMaps {
         clicked = null;
       }
 
-      if (clicked == selectedObject) {
+      if (clicked != null && clicked == GetSelectedObject()) {
         return;
       }
 
       if (clicked == scrollRect.gameObject) {
-        selectedObject = null;
+        SetSelectedObject(null);
       } else {
-        selectedObject = clicked;
+        SetSelectedObject(clicked);
       }
 
-      sidebarController.propertyEditor.SetSelectedObject(selectedObject);
-      transformEditor.SetEditingObject(selectedObject);
+      sidebarController.propertyEditor.SetSelectedObject(GetSelectedObject());
+      transformEditor.SetEditingObject(GetSelectedObject());
     }
 
     /// <summary>
     /// Deletes the currently selected object.
     /// </summary>
     public void OnDeleteButtonPress() {
-      if (selectedObject == null) {
+      if (GetSelectedObject() == null) {
         return;
       }
 
-      floorController.DeleteObject(selectedObject);
+      floorController.DeleteObject(GetSelectedObject());
       ProcessSelection(null);
 
       ActionManager.shared.Push();
@@ -283,6 +291,7 @@ namespace StackMaps {
     /// </summary>
     public void OnUndoButtonPress() {
       ActionManager.shared.Undo();
+      ProcessSelection(null);
     }
 
     /// <summary>
@@ -290,6 +299,7 @@ namespace StackMaps {
     /// </summary>
     public void OnRedoButtonPress() {
       ActionManager.shared.Redo();
+      ProcessSelection(null);
     }
   }
 }

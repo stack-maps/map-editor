@@ -55,6 +55,21 @@ namespace StackMaps {
     public void FromJSON(FloorController api, JSONNode root) {
       SetStart(new Vector2(root["x1"].AsFloat, root["y1"].AsFloat));
       SetEnd(new Vector2(root["x2"].AsFloat, root["y2"].AsFloat));
+
+      name = "(" + ActionManager.shared.index + ")" + GetHashCode();
+    }
+
+    public override int GetHashCode() {
+      float i = 0;
+      Vector2 pos = GetStart();
+      i += pos.x * 1351;
+      i += pos.y * 513;
+      Vector2 s = GetEnd();
+      i += s.x * 23;
+      i += s.y * 7;
+      i += transform.localEulerAngles.z * 0.25f;
+
+      return (int)i;
     }
   }
 }

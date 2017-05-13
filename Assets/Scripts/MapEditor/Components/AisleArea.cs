@@ -66,6 +66,8 @@ namespace StackMaps {
         aisle.transform.parent = container;
         aisle.FromJSON(api, node);
       }
+
+      name = "(" + ActionManager.shared.index + ")" + r.GetHashCode();
     }
   }
 }

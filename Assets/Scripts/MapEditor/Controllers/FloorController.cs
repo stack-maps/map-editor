@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using SimpleJSON;
+using System;
 
 namespace StackMaps {
   /// <summary>
@@ -224,9 +225,7 @@ namespace StackMaps {
     }
 
     public void ImportFloor(string floorJSON) {
-      Debug.Log("IMPORT: " + floorJSON);
       JSONNode root = JSONNode.Parse(floorJSON);
-      Debug.Log("Parsed: " + root.ToString());
 
       // Delete everything.
       for (int i = 0; i < aisleLayer.childCount; i++) {
@@ -250,8 +249,6 @@ namespace StackMaps {
 
     public string ExportFloor() {
       JSONNode node = floor.ToJSON();
-      Debug.Log("EXPORT: " + node.ToString());
-
       return node.ToString();
     }
   }
