@@ -28,8 +28,6 @@ namespace StackMaps {
     /// </summary>
     List<CallNumberRangeEditor> rangeEditors = new List<CallNumberRangeEditor>();
 
-
-
     /// <summary>
     /// Sets up the script according to the given object. If we can edit it,
     /// then we update our values. Otherwise hide this panel.
@@ -98,7 +96,12 @@ namespace StackMaps {
         return;
       }
 
+      bool changed = editingObject.singleSided != !sidednessSwitch.toggle.isOn;
       editingObject.singleSided = !sidednessSwitch.toggle.isOn;
+
+      if (changed) {
+        ActionManager.shared.Push();
+      }
     }
 
     /// <summary>
@@ -117,11 +120,14 @@ namespace StackMaps {
       editor.onDelete = () => {
         editingObject.callNumberRanges.Remove(range);
         editor.Delete();
+        ActionManager.shared.Push();
       };
 
       editor.Show(false, false);
       editor.Show(true, true);
       editor.SetEditingObject(range);
+
+      ActionManager.shared.Push();
     }
   }
 }

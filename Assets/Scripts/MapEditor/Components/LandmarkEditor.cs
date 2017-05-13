@@ -54,7 +54,13 @@ namespace StackMaps {
         return;
       }
 
-      editingObject.landmarkType = (LandmarkType)landmarkTypeDropdown.currentlySelected;
+      LandmarkType newVal = (LandmarkType)landmarkTypeDropdown.currentlySelected;
+      bool changed = editingObject.landmarkType != newVal;
+      editingObject.landmarkType = newVal;
+
+      if (changed) {
+        ActionManager.shared.Push();
+      }
     }
   }
 }

@@ -17,8 +17,6 @@ namespace StackMaps {
       if (!sendCallback)
         return;
 
-      Debug.Log(name);
-      
       foreach (SelectableDelegate d in delegates) {
         d(gameObject);
       }

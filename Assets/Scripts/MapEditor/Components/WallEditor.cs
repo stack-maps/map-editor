@@ -71,10 +71,18 @@ namespace StackMaps {
         return;
       }
 
-      editingObject.SetStart(new Vector2(float.Parse(x1InputField.text),
-        float.Parse(y1InputField.text)));
-      editingObject.SetEnd(new Vector2(float.Parse(x2InputField.text),
-        float.Parse(y2InputField.text)));
+      Vector2 newStart = new Vector2(float.Parse(x1InputField.text),
+                           float.Parse(y1InputField.text));
+      Vector2 newEnd = new Vector2(float.Parse(x2InputField.text),
+                         float.Parse(y2InputField.text));
+      bool changed = !((newStart - editingObject.GetStart()).magnitude < 0.01f &&
+                     (newEnd - editingObject.GetEnd()).magnitude < 0.01f);
+      editingObject.SetStart(newStart);
+      editingObject.SetEnd(newEnd);
+
+      if (changed) {
+        ActionManager.shared.Push();
+      }
 
       TransformEditor.shared.UpdateTransform();
     }

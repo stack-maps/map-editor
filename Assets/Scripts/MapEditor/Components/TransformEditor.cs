@@ -45,7 +45,16 @@ namespace StackMaps {
 
     Rectangle editingRect;
 
+    GameObject editingObject;
+
     Wall editingWall;
+
+    // These are used to cache transform size before dragging.
+    Vector2 cachedSize;
+    Vector2 cachedCenter;
+    Vector2 cachedWallStart;
+    Vector2 cachedWallEnd;
+    float cachedRotation;
 
     /// <summary>
     /// Sets up the script according to the given object. We switch modes
@@ -53,6 +62,8 @@ namespace StackMaps {
     /// </summary>
     /// <param name="obj">Object.</param>
     public void SetEditingObject(GameObject obj) {
+      editingObject = obj;
+
       if (obj == null) {
         editingRect = null;
         editingWall = null;
@@ -112,7 +123,7 @@ namespace StackMaps {
       }
 
       canvasGroup.interactable = editingRect != null || editingWall != null;
-      float goal = canvasGroup.interactable? 1 : 0;
+      float goal = canvasGroup.interactable ? 1 : 0;
       canvasGroup.blocksRaycasts = canvasGroup.interactable;
       TweenManager.TweenFloat(v => canvasGroup.alpha = v, canvasGroup.alpha, goal, 0.15f);
     }
@@ -295,6 +306,58 @@ namespace StackMaps {
         editingRect.SetRotation(editingRect.GetRotation() + sign * angleA);
 
         UpdateTransform();
+      };
+
+      // Below are functions that compare before and after drags. If they differ
+      // then user modified the rectangle and we should inform ActionManager.
+      RegisterHandleComparison(rotationHandle);
+      RegisterHandleComparison(translationHandle);
+      RegisterHandleComparison(resizeHandleTL);
+      RegisterHandleComparison(resizeHandleB);
+      RegisterHandleComparison(resizeHandleBL);
+      RegisterHandleComparison(resizeHandleBR);
+      RegisterHandleComparison(resizeHandleR);
+      RegisterHandleComparison(resizeHandleL);
+      RegisterHandleComparison(resizeHandleT);
+      RegisterHandleComparison(resizeHandleTR);
+    }
+
+    /// <summary>
+    /// Registers each handle to be able to push undo/redo stack if there is a
+    /// modification at the end of the drag.
+    /// </summary>
+    /// <param name="handle">Handle.</param>
+    void RegisterHandleComparison(TransformDrag handle) {
+      handle.beginDragHandler = data => {
+        if (editingRect != null) {
+          cachedCenter = editingRect.GetCenter();
+          cachedSize = editingRect.GetSize();
+          cachedRotation = editingRect.GetRotation();
+        } else if (editingWall != null) {
+          cachedWallStart = editingWall.GetStart();
+          cachedWallEnd = editingWall.GetEnd();
+        }
+      };
+
+      handle.endDragHandler = data => {
+        if (editingRect != null) {
+          Vector2 currCenter = editingRect.GetCenter();
+          Vector2 currSize = editingRect.GetSize();
+
+          if (!((currCenter - cachedCenter).magnitude < 0.01f &&
+              (currSize - cachedSize).magnitude < 0.01f &&
+              Mathf.Abs(cachedRotation - editingRect.GetRotation()) < 0.01f)) {
+            ActionManager.shared.Push();
+          }
+        } else if (editingWall != null) {
+          Vector2 currStart = editingWall.GetStart();
+          Vector2 currEnd = editingWall.GetEnd();
+
+          if (!((currStart - cachedWallStart).magnitude < 0.01f &&
+              (currEnd - cachedWallEnd).magnitude < 0.01f)) {
+            ActionManager.shared.Push();
+          }
+        }
       };
     }
 

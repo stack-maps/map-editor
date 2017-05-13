@@ -48,5 +48,19 @@ namespace StackMaps {
 
       return new Rect(c - s / 2, s);
     }
+
+    public override int GetHashCode() {
+      float i = 0;
+      i += disableEditing? 1 : 0;
+      Vector2 pos = ((RectTransform)transform).anchoredPosition;
+      i += pos.x * 1717;
+      i += pos.y * 112;
+      Vector2 s = ((RectTransform)transform).sizeDelta;
+      i += s.x * 11;
+      i += s.y * 3;
+      i += transform.localEulerAngles.z * 0.25f;
+
+      return (int)i;
+    }
   }
 }

@@ -13,11 +13,11 @@ namespace StackMaps {
 
     public delegate void DragHandler(PointerEventData eventData);
 
-    public delegate void BeginDragHandler();
-
     public DragHandler dragHandler;
 
-    public BeginDragHandler beginDragHandler;
+    public DragHandler beginDragHandler;
+
+    public DragHandler endDragHandler;
 
     /// <summary>
     /// Used by transform editor to store information when dragging started.
@@ -36,7 +36,7 @@ namespace StackMaps {
       dragging = true;
 
       if (beginDragHandler != null)
-        beginDragHandler();
+        beginDragHandler(eventData);
     }
     #endregion
     
@@ -51,6 +51,9 @@ namespace StackMaps {
 
     public void OnEndDrag(PointerEventData eventData) {
       dragging = false;
+
+      if (endDragHandler != null)
+        endDragHandler(eventData);
     }
 
     #endregion

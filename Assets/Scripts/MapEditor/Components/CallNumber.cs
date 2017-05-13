@@ -97,6 +97,34 @@ namespace StackMaps {
       return false;
     }
 
+    public CallNumber() {
+      
+    }
+
+    /// <summary>
+    /// Parses a call number string. Each part of the call number should be
+    /// separated by a space. There are maximally 4 parts.
+    /// </summary>
+    public CallNumber(string stringRep) {
+      if (String.IsNullOrEmpty(stringRep)) {
+        return;
+      }
+
+      string[] parts = stringRep.Split(' ');
+
+      if (parts.Length > 0)
+        SetClass(parts[0]);
+
+      if (parts.Length > 1)
+        SetSubclass(parts[1]);
+
+      if (parts.Length > 2)
+        SetCutter1(parts[2]);
+
+      if (parts.Length > 3)
+        SetCutter2(parts[3]);
+    }
+
     #region IComparable implementation
 
     public int CompareTo(object obj) {
@@ -220,6 +248,24 @@ namespace StackMaps {
     /// </summary>
     public bool HasCutter2() {
       return cnCutter2.Length > 0;
+    }
+
+    public override string ToString() {
+      string s = cnClass;
+
+      if (HasSubclass()) {
+        s += " " + cnSubclass;
+      }
+
+      if (HasCutter1()) {
+        s += " " + cnCutter1;
+      }
+
+      if (HasCutter2()) {
+        s += " " + cnCutter2;
+      }
+
+      return s;
     }
   }
 }

@@ -54,7 +54,14 @@ namespace StackMaps {
     /// Updates the object with editor values.
     /// </summary>
     public void UpdateObject() {
-      editingObject.SetHorizontal(orientationDropdown.currentlySelected == 0);
+      bool newVal = orientationDropdown.currentlySelected == 0;
+      bool changed = editingObject.IsHorizontal() != newVal;
+
+      editingObject.SetHorizontal(newVal);
+
+      if (changed) {
+        ActionManager.shared.Push();
+      }
     }
 
     /// <summary>
@@ -82,6 +89,10 @@ namespace StackMaps {
         Aisle obj = editingObject.aisles[desired];
         editingObject.aisles.RemoveAt(desired);
         Destroy(obj.gameObject);
+      }
+
+      if (desired != current) {
+        ActionManager.shared.Push();
       }
     }
   }
