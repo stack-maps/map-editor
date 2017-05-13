@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using SimpleJSON;
 
 namespace StackMaps {
   /// <summary>
@@ -37,5 +38,34 @@ namespace StackMaps {
       container.localEulerAngles = new Vector3(0, 0, horizontal ? 90 : 0);
     }
 
+    public JSONNode ToJSON() {
+      JSONObject root = new JSONObject();
+      Rectangle r = GetComponent<Rectangle>();
+      root["center_x"] = r.GetCenter().x;
+      root["center_y"] = r.GetCenter().y;
+      root["length"] = horizontal? r.GetSize().y : r.GetSize().x;
+      root["width"] = horizontal? r.GetSize().x : r.GetSize().y;
+      root["rotation"] = transform.localEulerAngles.z + container.localEulerAngles.z;
+      root["Aisle"] = new JSONArray();
+
+      foreach (Aisle aisle in aisles) {
+        root["Aisle"].Add(aisle.ToJSON());
+      }
+
+      return root;
+    }
+
+    public void FromJSON(FloorController api, JSONNode root) {
+      Rectangle r = GetComponent<Rectangle>();
+      r.SetCenter(new Vector2(root["center_x"].AsFloat, root["center_y"].AsFloat));
+      r.SetSize(new Vector2(root["length"].AsFloat, root["width"].AsFloat));
+      r.SetRotation(root["rotation"].AsFloat);
+
+      foreach (JSONNode node in root["Aisle"].AsArray) {
+        Aisle aisle = api.CreateAisle(Rect.zero, false);
+        aisle.transform.parent = container;
+        aisle.FromJSON(api, node);
+      }
+    }
   }
 }

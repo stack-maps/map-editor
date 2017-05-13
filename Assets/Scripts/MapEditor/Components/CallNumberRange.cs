@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using SimpleJSON;
 
 namespace StackMaps {
   /// <summary>
@@ -64,5 +65,23 @@ namespace StackMaps {
     /// This is for bookkeeping for two-sided aisles.
     /// </summary>
     public bool isSideA;
+
+
+    public JSONNode ToJSON() {
+      JSONObject root = new JSONObject();
+      root["collection"] = collection;
+      root["callstart"] = begin.ToString();
+      root["callend"] = end.ToString();
+      root["side"] = isSideA ? 0 : 1;
+
+      return root;
+    }
+
+    public void FromJSON(FloorController api, JSONNode root) {
+      collection = root["collection"];
+      begin = new CallNumber(root["callstart"]);
+      end = new CallNumber(root["callend"]);
+      isSideA = root["side"].AsInt == 0;
+    }
   }
 }

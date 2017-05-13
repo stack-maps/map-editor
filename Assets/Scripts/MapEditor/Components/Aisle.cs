@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using SimpleJSON;
 
 namespace StackMaps {
   /// <summary>
@@ -35,6 +36,39 @@ namespace StackMaps {
 
       if (sideB != null)
         sideB.SetActive(!singleSided);
+    }
+
+    public JSONNode ToJSON() {
+      JSONObject root = new JSONObject();
+      Rectangle r = GetComponent<Rectangle>();
+      root["center_x"] = r.GetCenter().x;
+      root["center_y"] = r.GetCenter().y;
+      root["length"] = r.GetSize().x;
+      root["width"] = r.GetSize().y;
+      root["rotation"] = r.GetRotation();
+      root["sides"] = singleSided ? 1 : 2;
+      root["call-range"] = new JSONArray();
+
+      foreach (CallNumberRange range in callNumberRanges) {
+        root["call-range"].Add(range.ToJSON());
+      }
+
+      return root;
+    }
+
+    public void FromJSON(FloorController api, JSONNode root) {
+      Rectangle r = GetComponent<Rectangle>();
+      r.SetCenter(new Vector2(root["center_x"].AsFloat, root["center_y"].AsFloat));
+      r.SetSize(new Vector2(root["length"].AsFloat, root["width"].AsFloat));
+      r.SetRotation(root["rotation"].AsFloat);
+      singleSided = root["sides"] == 1;
+      callNumberRanges.Clear();
+
+      foreach (JSONNode node in root["call-range"].AsArray) {
+        CallNumberRange range = new CallNumberRange();
+        range.FromJSON(api, node);
+        callNumberRanges.Add(range);
+      }
     }
   }
 }
