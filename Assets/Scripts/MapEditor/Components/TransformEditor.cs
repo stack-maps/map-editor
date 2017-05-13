@@ -14,6 +14,10 @@ namespace StackMaps {
   /// handles. In this script we specify what each handle should do.
   /// </summary>
   public class TransformEditor : MonoBehaviour {
+    // This is set by the edit area controller. Change it there!
+    public float snapGridSize = 20;
+    public float angleSize = 15;
+
     /// <summary>
     /// There will be update transform calls and this makes things easier.
     /// </summary>
@@ -152,7 +156,7 @@ namespace StackMaps {
       float uiScale = FindObjectOfType<Canvas>().scaleFactor;
 
       translationHandle.dragHandler = data => {
-        Vector2 delta = data.delta / canvasScale / uiScale;
+        Vector2 delta = SnapToGrid(data.delta / canvasScale / uiScale);
 
         if (editingRect != null) {
           editingRect.SetCenter(editingRect.GetCenter() + delta);
@@ -399,6 +403,10 @@ namespace StackMaps {
         transform.localPosition += (Vector3)centerDelta;
         ((RectTransform)transform).sizeDelta = s;
       }
+    }
+
+    Vector2 SnapToGrid(Vector2 p) {
+      return new Vector2(Mathf.Round(p.x / snapGridSize), Mathf.Round(p.y / snapGridSize)) * snapGridSize;
     }
 
     /// <summary>

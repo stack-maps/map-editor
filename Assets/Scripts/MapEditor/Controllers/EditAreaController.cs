@@ -11,6 +11,9 @@ namespace StackMaps {
   /// operations and updating the toolbar and the sidebar.
   /// </summary>
   public class EditAreaController : MonoBehaviour {
+    // The snapping grid size
+    public float snapGridSize = 20.0f;
+
     // The canvas where things are actually on the map.
     public RectTransform canvas;
 
@@ -52,6 +55,7 @@ namespace StackMaps {
     void Start() {
       Input.multiTouchEnabled = false;
       Selectable.delegates.Add(ProcessSelection);
+      transformEditor.snapGridSize = snapGridSize;
     }
 	
     // Update is called once per frame
@@ -239,8 +243,8 @@ namespace StackMaps {
         return false;
       }
 
-      Vector2 p1 = canvas.InverseTransformPoint(Input.mousePosition);
-      Vector2 p2 = canvas.InverseTransformPoint(mouseDownPos);
+      Vector2 p1 = SnapToGrid(canvas.InverseTransformPoint(Input.mousePosition));
+      Vector2 p2 = SnapToGrid(canvas.InverseTransformPoint(mouseDownPos));
 
       rect = Rect.MinMaxRect(
         Mathf.Min(p1.x, p2.x), Mathf.Min(p1.y, p2.y), 
@@ -248,6 +252,10 @@ namespace StackMaps {
       );
 
       return Input.GetMouseButtonUp(0);
+    }
+
+    Vector2 SnapToGrid(Vector2 p) {
+      return new Vector2(Mathf.Round(p.x / snapGridSize), Mathf.Round(p.y / snapGridSize)) * snapGridSize;
     }
 
     /// <summary>
