@@ -135,7 +135,7 @@ namespace StackMaps {
       if (editingRect != null) {
         transform.position = editingRect.transform.position;
         ((RectTransform)transform).sizeDelta = editingRect.GetSize();
-        transform.localEulerAngles = new Vector3(0, 0, editingRect.GetRotation());
+        transform.eulerAngles = editingRect.transform.eulerAngles;
       } else if (editingWall != null) {
         RectTransform t = editingWall.transform as RectTransform;
         ((RectTransform)transform).anchoredPosition = t.anchoredPosition;

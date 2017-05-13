@@ -28,14 +28,15 @@ namespace StackMaps {
       return horizontal;
     }
 
-    public void SetHorizontal(bool orientation) {
-      if (orientation == horizontal) {
-        return;
-      }
-
-      horizontal = orientation;
-      container.GetComponent<Resizer>().swapWidthHeight = horizontal;
-      container.localEulerAngles = new Vector3(0, 0, horizontal ? 90 : 0);
+    /// <summary>
+    /// Flips the area by 90 degrees while exchanging width with height.
+    /// Effectively turning all the stacks.
+    /// </summary>
+    public void Flip() {
+      Rectangle r = GetComponent<Rectangle>();
+      r.SetRotation(r.GetRotation() + (horizontal ? 90 : -90));
+      r.SetSize(new Vector2(r.GetSize().y, r.GetSize().x));
+      horizontal = !horizontal;
     }
 
     public JSONNode ToJSON() {
@@ -45,7 +46,7 @@ namespace StackMaps {
       root["center_y"] = r.GetCenter().y;
       root["length"] = horizontal? r.GetSize().y : r.GetSize().x;
       root["width"] = horizontal? r.GetSize().x : r.GetSize().y;
-      root["rotation"] = transform.localEulerAngles.z + container.localEulerAngles.z;
+      root["rotation"] = transform.localEulerAngles.z;
       root["Aisle"] = new JSONArray();
 
       foreach (Aisle aisle in aisles) {
