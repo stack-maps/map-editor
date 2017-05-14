@@ -16,7 +16,7 @@ namespace StackMaps {
   public class TransformEditor : MonoBehaviour {
     // This is set by the edit area controller. Change it there!
     public float snapGridSize = 20;
-    public float angleSize = 15;
+    public float snapAngleSize = 15;
 
     /// <summary>
     /// There will be update transform calls and this makes things easier.
@@ -41,6 +41,12 @@ namespace StackMaps {
 
     CanvasGroup canvasGroup;
 
+    // Used to find the canvas for scale.
+    Canvas canvas;
+
+    // Cached information for snapping.
+    Vector2 startMousePos;
+
     /// <summary>
     /// The current canvas scale. This is required since the screen-coordinates
     /// are not necessarily to be the same as the canvas coordinates.
@@ -48,8 +54,6 @@ namespace StackMaps {
     public float canvasScale = 1;
 
     Rectangle editingRect;
-
-    GameObject editingObject;
 
     Wall editingWall;
 
@@ -59,6 +63,8 @@ namespace StackMaps {
     Vector2 cachedWallStart;
     Vector2 cachedWallEnd;
     float cachedRotation;
+    float cachedUserRotation;
+    Vector2 cachedSelfPosition;
 
     /// <summary>
     /// Sets up the script according to the given object. We switch modes
@@ -66,8 +72,6 @@ namespace StackMaps {
     /// </summary>
     /// <param name="obj">Object.</param>
     public void SetEditingObject(GameObject obj) {
-      editingObject = obj;
-
       if (obj == null) {
         editingRect = null;
         editingWall = null;
@@ -148,21 +152,25 @@ namespace StackMaps {
       }
     }
 
+    void Start() {
+      canvas = FindObjectOfType<Canvas>();
+    }
+
+
     /// <summary>
     /// Defines all handle actions.
     /// </summary>
     void Awake() {
       shared = this;
-      float uiScale = FindObjectOfType<Canvas>().scaleFactor;
 
       translationHandle.dragHandler = data => {
-        Vector2 delta = SnapToGrid(data.delta / canvasScale / uiScale);
+        Vector2 delta = SnapToGrid((data.position - startMousePos) / canvasScale / canvas.scaleFactor);
 
         if (editingRect != null) {
-          editingRect.SetCenter(editingRect.GetCenter() + delta);
+          editingRect.SetCenter(cachedCenter + delta);
         } else if (editingWall != null) {
-          editingWall.SetStart(editingWall.GetStart() + delta);
-          editingWall.SetEnd(editingWall.GetEnd() + delta);
+          editingWall.SetStart(cachedWallStart + delta);
+          editingWall.SetEnd(cachedWallEnd + delta);
         }
 
         UpdateTransform();
@@ -181,40 +189,44 @@ namespace StackMaps {
 
       resizeHandleTL.dragHandler = data => {
         // Rotate
-        Vector2 delta = Quaternion.Euler(0, 0, -transform.localEulerAngles.z) * data.delta / canvasScale / uiScale;
+        Vector2 delta = SnapToGrid((data.position - startMousePos) / canvasScale / canvas.scaleFactor);
+        delta = Quaternion.Euler(0, 0, -transform.localEulerAngles.z) * (Vector3)delta;
 
-        Rect r = ((RectTransform)transform).rect;
-        r.center = transform.localPosition;
+        Rect r = new Rect(Vector2.zero, cachedSize);
+        r.center = cachedCenter;
         Vector2 movingPt = new Vector2(r.xMin, r.yMax);
         Vector2 oppositePt = new Vector2(r.xMax, r.yMin);
         Resize(delta, movingPt, oppositePt, false, true);
       };
 
       resizeHandleTR.dragHandler = data => {
-        Vector2 delta = Quaternion.Euler(0, 0, -transform.localEulerAngles.z) * data.delta / canvasScale / uiScale;
+        Vector2 delta = SnapToGrid((data.position - startMousePos) / canvasScale / canvas.scaleFactor);
+        delta = Quaternion.Euler(0, 0, -transform.localEulerAngles.z) * (Vector3)delta;
 
-        Rect r = ((RectTransform)transform).rect;
-        r.center = transform.localPosition;
+        Rect r = new Rect(Vector2.zero, cachedSize);
+        r.center = cachedCenter;
         Vector2 movingPt = new Vector2(r.xMax, r.yMax);
         Vector2 oppositePt = new Vector2(r.xMin, r.yMin);
         Resize(delta, movingPt, oppositePt, true, true);
       };
 
       resizeHandleBL.dragHandler = data => {
-        Vector2 delta = Quaternion.Euler(0, 0, -transform.localEulerAngles.z) * data.delta / canvasScale / uiScale;
+        Vector2 delta = SnapToGrid((data.position - startMousePos) / canvasScale / canvas.scaleFactor);
+        delta = Quaternion.Euler(0, 0, -transform.localEulerAngles.z) * (Vector3)delta;
 
-        Rect r = ((RectTransform)transform).rect;
-        r.center = transform.localPosition;
+        Rect r = new Rect(Vector2.zero, cachedSize);
+        r.center = cachedCenter;
         Vector2 movingPt = new Vector2(r.xMin, r.yMin);
         Vector2 oppositePt = new Vector2(r.xMax, r.yMax);
         Resize(delta, movingPt, oppositePt, false, false);
       };
 
       resizeHandleBR.dragHandler = data => {
-        Vector2 delta = Quaternion.Euler(0, 0, -transform.localEulerAngles.z) * data.delta / canvasScale / uiScale;
+        Vector2 delta = SnapToGrid((data.position - startMousePos) / canvasScale / canvas.scaleFactor);
+        delta = Quaternion.Euler(0, 0, -transform.localEulerAngles.z) * (Vector3)delta;
 
-        Rect r = ((RectTransform)transform).rect;
-        r.center = transform.localPosition;
+        Rect r = new Rect(Vector2.zero, cachedSize);
+        r.center = cachedCenter;
         Vector2 movingPt = new Vector2(r.xMax, r.yMin);
         Vector2 oppositePt = new Vector2(r.xMin, r.yMax);
         Resize(delta, movingPt, oppositePt, true, false);
@@ -223,15 +235,15 @@ namespace StackMaps {
       resizeHandleL.dragHandler = data => {
         // Now two things. This handle (and R) is active for both wall and rect.
         // They are treated differently, though.
-        Vector2 delta = data.delta / canvasScale / uiScale;
+        Vector2 delta = SnapToGrid((data.position - startMousePos) / canvasScale / canvas.scaleFactor);
 
         if (editingRect != null) {
           // Rotate and filter movement.
           delta = Quaternion.Euler(0, 0, -transform.localEulerAngles.z) * (Vector3)delta;
           delta.y = 0;
 
-          Rect r = ((RectTransform)transform).rect;
-          r.center = transform.localPosition;
+          Rect r = new Rect(Vector2.zero, cachedSize);
+          r.center = cachedCenter;
           // For the single direction movement, this is fine, even though moving
           // point isn't exactly the handle.
           Vector2 movingPt = new Vector2(r.xMin, r.yMax);
@@ -245,14 +257,15 @@ namespace StackMaps {
       };
 
       resizeHandleR.dragHandler = data => {
-        Vector2 delta = data.delta / canvasScale / uiScale;
+        Vector2 delta = SnapToGrid((data.position - startMousePos) / canvasScale / canvas.scaleFactor);
+
         if (editingRect != null) {
           // Rotate and filter movement.
           delta = Quaternion.Euler(0, 0, -transform.localEulerAngles.z) * (Vector3)delta;
           delta.y = 0;
 
-          Rect r = ((RectTransform)transform).rect;
-          r.center = transform.localPosition;
+          Rect r = new Rect(Vector2.zero, cachedSize);
+          r.center = cachedCenter;
           Vector2 movingPt = new Vector2(r.xMax, r.yMin);
           Vector2 oppositePt = new Vector2(r.xMin, r.yMax);
           Resize(delta, movingPt, oppositePt, true, false);
@@ -264,22 +277,24 @@ namespace StackMaps {
       };
 
       resizeHandleT.dragHandler = data => {
-        Vector2 delta = Quaternion.Euler(0, 0, -transform.localEulerAngles.z) * data.delta / canvasScale / uiScale;
+        Vector2 delta = SnapToGrid((data.position - startMousePos) / canvasScale / canvas.scaleFactor);
+        delta = Quaternion.Euler(0, 0, -transform.localEulerAngles.z) * (Vector3)delta;
         delta.x = 0;
 
-        Rect r = ((RectTransform)transform).rect;
-        r.center = transform.localPosition;
+        Rect r = new Rect(Vector2.zero, cachedSize);
+        r.center = cachedCenter;
         Vector2 movingPt = new Vector2(r.xMax, r.yMax);
         Vector2 oppositePt = new Vector2(r.xMin, r.yMin);
         Resize(delta, movingPt, oppositePt, true, true);
       };
 
       resizeHandleB.dragHandler = data => {
-        Vector2 delta = Quaternion.Euler(0, 0, -transform.localEulerAngles.z) * data.delta / canvasScale / uiScale;
+        Vector2 delta = SnapToGrid((data.position - startMousePos) / canvasScale / canvas.scaleFactor);
+        delta = Quaternion.Euler(0, 0, -transform.localEulerAngles.z) * (Vector3)delta;
         delta.x = 0;
 
-        Rect r = ((RectTransform)transform).rect;
-        r.center = transform.localPosition;
+        Rect r = new Rect(Vector2.zero, cachedSize);
+        r.center = cachedCenter;
         Vector2 movingPt = new Vector2(r.xMin, r.yMin);
         Vector2 oppositePt = new Vector2(r.xMax, r.yMax);
         Resize(delta, movingPt, oppositePt, false, false);
@@ -307,7 +322,12 @@ namespace StackMaps {
 
         float sign = Mathf.Sign(a2 - a1);
 
-        editingRect.SetRotation(editingRect.GetRotation() + sign * angleA);
+        cachedUserRotation += sign * angleA;
+
+        // Round
+        float roundedRotation = Mathf.Round(cachedUserRotation / snapAngleSize) * snapAngleSize;
+
+        editingRect.SetRotation(cachedRotation + roundedRotation);
 
         UpdateTransform();
       };
@@ -333,6 +353,10 @@ namespace StackMaps {
     /// <param name="handle">Handle.</param>
     void RegisterHandleComparison(TransformDrag handle) {
       handle.beginDragHandler = data => {
+        startMousePos = data.position;
+        cachedUserRotation = 0;
+        cachedSelfPosition = transform.localPosition;
+
         if (editingRect != null) {
           cachedCenter = editingRect.GetCenter();
           cachedSize = editingRect.GetSize();
@@ -376,8 +400,9 @@ namespace StackMaps {
     /// </summary>
     void Resize(Vector2 delta, Vector2 movingPt, Vector2 oppositePt, bool mxGTox, bool myGToy) {
       if (editingRect != null) {
-        Rect curr = ((RectTransform)transform).rect;
-        curr.center = transform.localPosition;
+        Rect curr = new Rect(Vector2.zero, cachedSize);
+        curr.center = cachedCenter;
+        Quaternion q = Quaternion.Euler(0, 0, transform.localEulerAngles.z);
 
         // Form a new rectangle based on the offset. The offset has to be
         // rotated according to our current rotation.
@@ -392,15 +417,17 @@ namespace StackMaps {
                       Mathf.Max(p1.x, p2.x), Mathf.Max(p1.y, p2.y)
                     );
 
-        editingRect.SetCenter(rect.center);
+
+        Vector2 newCenter = q * (Vector3)(rect.center - curr.center) + (Vector3)curr.center;
+        editingRect.SetCenter(newCenter);
         editingRect.SetSize(rect.size);
 
         // We need to update in such a way we allow negative width/height.
         // We also need to do a rotation. How much the center moved locally is
         // different than how much the center moved in parent transform space.
-        Vector2 localCenterDelta = ((p1 + p2) / 2 - (Vector2)transform.localPosition);
-        Vector2 centerDelta = Quaternion.Euler(0, 0, transform.localEulerAngles.z) * localCenterDelta;
-        transform.localPosition += (Vector3)centerDelta;
+        Vector2 localCenterDelta = (p1 + p2) / 2 - cachedCenter;
+        Vector2 centerDelta = q * localCenterDelta;
+        transform.localPosition = cachedSelfPosition + centerDelta;
         ((RectTransform)transform).sizeDelta = s;
       }
     }

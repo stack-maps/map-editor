@@ -13,6 +13,7 @@ namespace StackMaps {
   public class EditAreaController : MonoBehaviour {
     // The snapping grid size
     public float snapGridSize = 20.0f;
+    public float snapAngleSize = 15.0f;
 
     // The canvas where things are actually on the map.
     public RectTransform canvas;
@@ -56,6 +57,7 @@ namespace StackMaps {
       Input.multiTouchEnabled = false;
       Selectable.delegates.Add(ProcessSelection);
       transformEditor.snapGridSize = snapGridSize;
+      transformEditor.snapAngleSize = snapAngleSize;
     }
 	
     // Update is called once per frame

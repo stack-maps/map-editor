@@ -46,7 +46,6 @@ namespace StackMaps {
       JSONObject root = new JSONObject();
       root["fid"] = floorId;
       root["fname"] = floorName;
-      root["forder"] = floorName;
       root["library"] = libraryId;
       root["Aisle"] = new JSONArray();
       root["AisleArea"] = new JSONArray();
