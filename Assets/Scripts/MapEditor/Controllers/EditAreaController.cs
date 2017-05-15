@@ -30,6 +30,9 @@ namespace StackMaps {
     // The transform editor.
     public TransformEditor transformEditor;
 
+    // The grid line controller
+    public GridController gridController;
+
     // The floor controller, a data-heavy class dealing with representation and
     // serialization of the floor.
     public FloorController floorController;
@@ -58,6 +61,8 @@ namespace StackMaps {
       Selectable.delegates.Add(ProcessSelection);
       transformEditor.snapGridSize = snapGridSize;
       transformEditor.snapAngleSize = snapAngleSize;
+      gridController.gridSize = snapGridSize;
+      gridController.UpdateGrid(canvas.sizeDelta);
     }
 	
     // Update is called once per frame
