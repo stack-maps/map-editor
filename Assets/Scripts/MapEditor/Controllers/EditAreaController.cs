@@ -30,6 +30,9 @@ namespace StackMaps {
     // The transform editor.
     public TransformEditor transformEditor;
 
+    // The grid line controller
+    public GridController gridController;
+
     // The floor controller, a data-heavy class dealing with representation and
     // serialization of the floor.
     public FloorController floorController;
@@ -40,6 +43,10 @@ namespace StackMaps {
     // The point where user pressed the mouse.
     Vector3 mouseDownPos;
     bool dragInitiated;
+
+    // The cursor id.
+    int crosshairId = 99;
+    int dragId = 99;
 
     // Selection tool
     public GameObject _selectedObject;
@@ -58,6 +65,8 @@ namespace StackMaps {
       Selectable.delegates.Add(ProcessSelection);
       transformEditor.snapGridSize = snapGridSize;
       transformEditor.snapAngleSize = snapAngleSize;
+      gridController.gridSize = snapGridSize;
+      gridController.UpdateGrid(canvas.sizeDelta);
     }
 	
     // Update is called once per frame
@@ -140,7 +149,7 @@ namespace StackMaps {
     /// </summary>
     void ToggleCursor() {
       if (!IsMouseInEditingArea()) {
-        Cursor.SetCursor(null, Vector2.zero, CursorMode.Auto);
+        CursorController.PopCursor(crosshairId);
         return;
       }
 
@@ -152,9 +161,10 @@ namespace StackMaps {
       ToolType current = toolbarController.toolbar.GetActiveTool();
 
       if (current != ToolType.SelectionTool) {
-        Cursor.SetCursor(cursorCrosshair, new Vector2(17.5f, 17.5f), CursorMode.Auto);
+        if (CursorController.GetCurrentId() < crosshairId)
+          crosshairId = CursorController.PushCursor(cursorCrosshair, new Vector2(17.5f, 17.5f));
       } else {
-        Cursor.SetCursor(null, Vector2.zero, CursorMode.Auto);
+        CursorController.PopCursor(crosshairId);
       }
     }
 
@@ -217,8 +227,8 @@ namespace StackMaps {
     void ProcessInputForWallTool() {
       if (dragInitiated) {
         bool completed = Input.GetMouseButtonUp(0);
-        Vector2 begin = canvas.InverseTransformPoint(mouseDownPos);
-        Vector2 end = canvas.InverseTransformPoint(Input.mousePosition);
+        Vector2 begin = SnapToGrid(canvas.InverseTransformPoint(mouseDownPos));
+        Vector2 end = SnapToGrid(canvas.InverseTransformPoint(Input.mousePosition));
         floorController.CreateWall(begin, end, !completed);
       }
     }
