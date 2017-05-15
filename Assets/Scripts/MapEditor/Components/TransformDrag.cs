@@ -32,19 +32,23 @@ namespace StackMaps {
     }
 
     #region IBeginDragHandler implementation
+
     public void OnBeginDrag(PointerEventData eventData) {
       dragging = true;
 
       if (beginDragHandler != null)
         beginDragHandler(eventData);
     }
+
     #endregion
-    
+
     #region IDragHandler implementation
+
     public void OnDrag(PointerEventData eventData) {
       if (dragHandler != null)
         dragHandler(eventData);
     }
+
     #endregion
 
     #region IEndDragHandler implementation
