@@ -217,8 +217,8 @@ namespace StackMaps {
     void ProcessInputForWallTool() {
       if (dragInitiated) {
         bool completed = Input.GetMouseButtonUp(0);
-        Vector2 begin = canvas.InverseTransformPoint(mouseDownPos);
-        Vector2 end = canvas.InverseTransformPoint(Input.mousePosition);
+        Vector2 begin = SnapToGrid(canvas.InverseTransformPoint(mouseDownPos));
+        Vector2 end = SnapToGrid(canvas.InverseTransformPoint(Input.mousePosition));
         floorController.CreateWall(begin, end, !completed);
       }
     }
