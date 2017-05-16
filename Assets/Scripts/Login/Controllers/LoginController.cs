@@ -15,6 +15,7 @@ namespace StackMaps {
     public MaterialInputField usernameInputField;
     public MaterialInputField passwordInputField;
     public MaterialInputField addressInputField;
+    public Image screenTransitionMask;
 
     void Start() {
       usernameInputField.inputField.text = PlayerPrefs.GetString(PlayerPrefsKey.SavedUsername);
@@ -29,25 +30,31 @@ namespace StackMaps {
       string username = usernameInputField.inputField.text;
       string password = passwordInputField.inputField.text;
       string api = addressInputField.inputField.text;
-      Debug.Log(password);
 
       DialogComplexProgress d = (DialogComplexProgress)DialogManager.CreateComplexProgressLinear();
       d.Initialize("Connecting to server", "Loading", MaterialIconHelper.GetIcon(MaterialIconEnum.HOURGLASS_EMPTY));
       d.InitializeCancelButton("Cancel", () => {
-        ServiceController.shared.CancelConnect();
+        ServiceController.shared.CancelLogin();
         d.Hide();
       });
 
+      DontDestroyOnLoad(d.gameObject);
       d.Show();
 
       ServiceController.shared.Login(api, username, password, (success, authenticated) => {
         if (success && authenticated) {
           PlayerPrefs.SetString(PlayerPrefsKey.SavedAddress, api);
           PlayerPrefs.SetString(PlayerPrefsKey.SavedUsername, username);
-          SceneManager.LoadScene(1);
-        } else {
-          d.Hide();
+          AsyncOperation o = SceneManager.LoadSceneAsync(1);
+          o.allowSceneActivation = false;
 
+          TweenManager.TweenFloat(v => {
+            Color c = screenTransitionMask.color;
+            c.a = v;
+            screenTransitionMask.color = c;
+          }, 0, 1, 0.6f, 0, () => o.allowSceneActivation = true);
+
+        } else {
           if (!success)
             DialogManager.ShowAlert("Unable to connect to the given address.", 
               "Connection Error", MaterialIconHelper.GetIcon(MaterialIconEnum.ERROR));
@@ -55,14 +62,12 @@ namespace StackMaps {
             DialogManager.ShowAlert("Incorrect username or password.", 
               "Login Failed", MaterialIconHelper.GetIcon(MaterialIconEnum.ERROR));
         }
+
+        d.Hide();
       });
 
     }
 
-    IEnumerator HideWindowAfterSeconds(MaterialDialog dialog, float duration) {
-      yield return new WaitForSeconds(duration);
-      dialog.Hide();
-    }
 
     void Update() {
       if (Input.GetKeyDown(KeyCode.Tab)) {
