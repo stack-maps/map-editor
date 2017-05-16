@@ -46,7 +46,6 @@ namespace StackMaps {
 
     // The cursor id.
     int crosshairId = 99;
-    int dragId = 99;
 
     // Selection tool
     public GameObject _selectedObject;

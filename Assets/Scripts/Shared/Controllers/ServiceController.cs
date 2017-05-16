@@ -17,10 +17,12 @@ namespace StackMaps {
 
     // This is the URL to the service php script. It is where all API calls are
     // sent to.
-    string apiUrl = "";
+    string apiUrl = "http://zhengfu23.us/api.php";
 
     // This is our token, acting as a pass for making changes to the database.
     string token = "";
+
+    #region Login
 
     // The coroutine handling network connection.
     Coroutine loginCoroutine;
@@ -68,7 +70,6 @@ namespace StackMaps {
         Debug.Log("Unable to login: " + request.error);
         callback(false, false);
       } else {
-        Debug.Log(request.text);
         JSONNode node = JSON.Parse(request.text);
 
         if (node["success"]) {
@@ -91,6 +92,79 @@ namespace StackMaps {
       StopCoroutine(loginCoroutine);
       loginCoroutine = null;
     }
+
+    #endregion
+
+    #region GetLibraryList
+
+    // The coroutine handling network connection.
+    Coroutine getLibraryListCoroutine;
+
+    /// <summary>
+    /// A callback to Login method called after server responds.
+    /// </summary>
+    /// <param name="success">Whether the request successful.</param>
+    /// <param name="authenticated">Whether login is successful.</param>
+    public delegate void GetLibraryListCallback(bool success, List<Library> data);
+
+    /// <summary>
+    /// Fetches the list of libraries in the database. Does nothing if there is
+    /// already a request under way.
+    /// </summary>
+    /// <param name="callback">Callback function for data handling.</param>
+    public void GetLibraryList(GetLibraryListCallback callback) {
+      if (getLibraryListCoroutine != null) {
+        return;
+      }
+
+      getLibraryListCoroutine = StartCoroutine(GetLibraryListLoop(callback));
+    }
+
+    IEnumerator GetLibraryListLoop(GetLibraryListCallback callback) {
+      WWWForm form = new WWWForm();
+      form.AddField("request", "getLibraryList");
+
+      // Create a download object
+      WWW request = new WWW(apiUrl, form);
+
+      // Wait until the download is done
+      yield return request;
+
+      if (!string.IsNullOrEmpty(request.error)) {
+        Debug.Log("Unable to fetch library list: " + request.error);
+        callback(false, null);
+      } else {
+        Debug.Log(request.text);
+        JSONNode root = JSON.Parse(request.text);
+
+        // Parse the library list here.
+        List<Library> libList = new List<Library>();
+
+        foreach (JSONNode node in root.AsArray) {
+          Library lib = new Library();
+          lib.libraryName = node["lname"];
+          lib.libraryId = node["lid"];
+          libList.Add(lib);
+        }
+
+        callback(true, libList);
+      }
+
+      getLibraryListCoroutine = null;
+    }
+
+    /// <summary>
+    /// Cancels the connection. This guarantees that the callback passed in from
+    /// connect will never be called. If no current connection is underway, does
+    /// nothing.
+    /// </summary>
+    public void CancelGetLibraryList() {
+      StopCoroutine(getLibraryListCoroutine);
+      getLibraryListCoroutine = null;
+    }
+
+    #endregion
+
 
     void Awake() {
       if (shared != null) {
