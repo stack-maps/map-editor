@@ -20,6 +20,8 @@ namespace StackMaps {
 
     public FloorPreviewCell floorPreviewCellPrefab;
 
+    public EditAreaController editAreaController;
+
     /// <summary>
     /// Displays the library view controller, populating the view with the given
     /// library's information. Assume the library is loaded.
@@ -63,17 +65,24 @@ namespace StackMaps {
 
       // Put new ones in.
       for (int i = 0; i < library.floors.Count; i++) {
+        int cap = i;
         FloorPreviewCell cell = Instantiate(floorPreviewCellPrefab, previewCellContainer);
         Canvas.ForceUpdateCanvases();
         cell.SetFloorName(library.floors[i].floorName);
+        cell.SetEditButtonCallback(() => EditFloor(library.floors[cap]));
+        // Also add in dropdown button callbacks!
         // cell.SetCanMoveUp(i > 0);
         // cell.SetCanMoveDown(i < library.floors.Count);
-
         floorPreviewController.DrawFloorPreview(cell.previewContainer, library.floors[i].floorJSONCache);
       }
 
       // Move the last cell last.
       previewEndCell.SetAsLastSibling();
+    }
+
+    void EditFloor(Floor f) {
+      view.SetActive(false);
+      editAreaController.BeginEdit(f);
     }
   }
 }

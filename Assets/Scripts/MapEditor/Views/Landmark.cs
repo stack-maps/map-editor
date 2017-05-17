@@ -35,7 +35,7 @@ namespace StackMaps {
     }
 
     void Update() {
-      if (icon != null && landmarkIcons[landmarkType] != null)
+      if (icon != null && landmarkIcons != null && landmarkIcons[landmarkType] != null)
         icon.SetImage(landmarkIcons[landmarkType]);
     }
 

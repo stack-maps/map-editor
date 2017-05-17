@@ -65,7 +65,7 @@ namespace StackMaps {
       r.SetSize(new Vector2(root["length"].AsFloat, root["width"].AsFloat));
       r.SetRotation(root["rotation"].AsFloat);
       singleSided = root["sides"] == 1;
-      callNumberRanges.Clear();
+      callNumberRanges = new List<CallNumberRange>();
 
       foreach (JSONNode node in root["call-range"].AsArray) {
         CallNumberRange range = new CallNumberRange();

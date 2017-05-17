@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using MaterialUI;
 using UnityEngine.UI;
+using UnityEngine.Events;
 
 namespace StackMaps {
   /// <summary>
@@ -23,6 +24,11 @@ namespace StackMaps {
     /// The container for floor preview generation.
     /// </summary>
     public RectTransform previewContainer;
+
+    /// <summary>
+    /// The edit button that's on top of the preview.
+    /// </summary>
+    public Button editButton;
 
     /// <summary>
     /// Clears out floor preview.
@@ -59,6 +65,22 @@ namespace StackMaps {
       CanvasGroup g = editMenuDropdown.listItems[2].canvasGroup;
       g.alpha = isNotLast ? 1 : 0.5f;
       g.interactable = isNotLast;
+    }
+
+    /// <summary>
+    /// Sets the edit button callback.
+    /// </summary>
+    /// <param name="callback">Callback.</param>
+    public void SetEditButtonCallback(UnityAction callback) {
+      editButton.onClick.AddListener(callback);
+    }
+
+    /// <summary>
+    /// Sets the dropdown callback.
+    /// </summary>
+    /// <param name="callback">Callback.</param>
+    public void SetDropdownCallback(UnityAction<int> callback) {
+      editMenuDropdown.onItemSelected.AddListener(callback);
     }
   }
 }

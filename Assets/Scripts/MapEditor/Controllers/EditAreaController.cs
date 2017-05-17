@@ -18,6 +18,9 @@ namespace StackMaps {
     // The canvas where things are actually on the map.
     public RectTransform canvas;
 
+    // The root object under our control.
+    public GameObject root;
+
     // The scroll rect of the edit area.
     public ScrollRect scrollRect;
 
@@ -319,6 +322,15 @@ namespace StackMaps {
     public void OnRedoButtonPress() {
       ActionManager.shared.Redo();
       ProcessSelection(null);
+    }
+
+    /// <summary>
+    /// Begins editing floor f.
+    /// </summary>
+    /// <param name="f">The floor to edit, fully loaded from server.</param>
+    public void BeginEdit(Floor f) {
+      root.SetActive(true);
+      floorController.ImportFloor(f.floorJSONCache);
     }
   }
 }
