@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using MaterialUI;
 
 namespace StackMaps {
   /// <summary>
@@ -16,6 +17,9 @@ namespace StackMaps {
     public GameObject loadFailedPanel;
     public GameObject emptyPanel;
     public LibraryCell libraryCellPrefab;
+
+    public LibraryViewController libraryViewController;
+
 
     List<Library> libraries;
 
@@ -54,7 +58,7 @@ namespace StackMaps {
       loadFailedPanel.SetActive(mode == DisplayMode.LoadFailed);
       emptyPanel.SetActive(mode == DisplayMode.Loaded && libraries != null && libraries.Count == 0);
     }
-    
+
     public void OnExpandButtonPress() {
       // We want to show or hide everything in the panel.
       container.Show(expandButton.isExpanded, true);
@@ -68,8 +72,42 @@ namespace StackMaps {
 
       // Add
       for (int i = 0; i < libraries.Count; i++) {
+        int capture = i;
         LibraryCell cell = Instantiate(libraryCellPrefab, container.transform);
         cell.SetLibrary(libraries[i]);
+        cell.selectButton.buttonObject.onClick.AddListener(() => OnLibraryCellPress(capture));
+      }
+    }
+
+    void OnLibraryCellPress(int index) {
+      // Configure library view controller.
+      if (libraries[index].floors == null) {
+        // We need to load this library from server first! That means a loading
+        // dialog.
+        DialogComplexProgress d = (DialogComplexProgress)DialogManager.CreateComplexProgressLinear();
+        d.Initialize("Getting library floor plans...", "Loading", MaterialIconHelper.GetIcon(MaterialIconEnum.HOURGLASS_EMPTY));
+        d.InitializeCancelButton("Cancel", () => {
+          ServiceController.shared.CancelGetLibrary();
+          d.Hide();
+        });
+
+        d.Show();
+
+        ServiceController.shared.GetLibrary(libraries[index].libraryId, (success, lib) => {
+          d.Hide();
+
+          if (success) {
+            // Load the library.
+            libraries[index] = lib;
+            libraryViewController.Show(libraries[index]);
+          } else {
+            // Display error.
+            DialogManager.ShowAlert("Unable to connect to server!", 
+              "Connection Error", MaterialIconHelper.GetIcon(MaterialIconEnum.ERROR));
+          }
+        });
+      } else {
+        libraryViewController.Show(libraries[index]);
       }
     }
   }

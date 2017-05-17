@@ -32,7 +32,7 @@ namespace StackMaps {
       string api = addressInputField.inputField.text;
 
       DialogComplexProgress d = (DialogComplexProgress)DialogManager.CreateComplexProgressLinear();
-      d.Initialize("Connecting to server", "Loading", MaterialIconHelper.GetIcon(MaterialIconEnum.HOURGLASS_EMPTY));
+      d.Initialize("Connecting to server...", "Loading", MaterialIconHelper.GetIcon(MaterialIconEnum.HOURGLASS_EMPTY));
       d.InitializeCancelButton("Cancel", () => {
         ServiceController.shared.CancelLogin();
         d.Hide();

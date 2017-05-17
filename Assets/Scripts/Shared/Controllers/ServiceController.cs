@@ -35,8 +35,8 @@ namespace StackMaps {
     public delegate void LoginCallback(bool success,bool authenticated);
 
     /// <summary>
-    /// Connect to the specified url with given username and password. If there is
-    /// already a connecting attempt, does nothing.
+    /// Connect to the specified url with given username and password. If there
+    /// is already a connecting attempt, does nothing.
     /// </summary>
     /// <param name="url">URL of the API.</param>
     /// <param name="username">Username.</param>
@@ -101,15 +101,16 @@ namespace StackMaps {
     Coroutine getLibraryListCoroutine;
 
     /// <summary>
-    /// A callback to Login method called after server responds.
+    /// A callback to GetLibraryList.
     /// </summary>
     /// <param name="success">Whether the request successful.</param>
-    /// <param name="authenticated">Whether login is successful.</param>
-    public delegate void GetLibraryListCallback(bool success, List<Library> data);
+    /// <param name="data">Parsed library data.</param>
+    public delegate void GetLibraryListCallback(bool success,List<Library> data);
 
     /// <summary>
     /// Fetches the list of libraries in the database. Does nothing if there is
-    /// already a request under way.
+    /// already a request under way. Note this returns an incomplete list giving
+    /// only library ids and names.
     /// </summary>
     /// <param name="callback">Callback function for data handling.</param>
     public void GetLibraryList(GetLibraryListCallback callback) {
@@ -142,8 +143,7 @@ namespace StackMaps {
 
         foreach (JSONNode node in root.AsArray) {
           Library lib = new Library();
-          lib.libraryName = node["lname"];
-          lib.libraryId = node["lid"];
+          lib.FromJSON(node);
           libList.Add(lib);
         }
 
@@ -165,6 +165,75 @@ namespace StackMaps {
 
     #endregion
 
+    #region GetLibrary
+
+    // The coroutine handling network connection.
+    Coroutine getLibraryCoroutine;
+
+    /// <summary>
+    /// A callback to GetLibrary method called after server responds.
+    /// </summary>
+    /// <param name="success">Whether the request successful.</param>
+    /// <param name="data">Parsed library data.</param>
+    public delegate void GetLibraryCallback(bool success,Library data);
+
+    /// <summary>
+    /// Fetches the given library in the database. Does nothing if there is
+    /// already a request under way.
+    /// </summary>
+    /// <param name = "libId"></param>
+    /// <param name="callback">Callback function for data handling.</param>
+    public void GetLibrary(int libId, GetLibraryCallback callback) {
+      if (getLibraryCoroutine != null) {
+        return;
+      }
+
+      getLibraryCoroutine = StartCoroutine(GetLibraryLoop(libId, callback));
+    }
+
+    IEnumerator GetLibraryLoop(int libId, GetLibraryCallback callback) {
+      WWWForm form = new WWWForm();
+      form.AddField("request", "getLibrary");
+      form.AddField("lid", libId);
+
+      // Create a download object
+      WWW request = new WWW(apiUrl, form);
+
+      // Wait until the download is done
+      yield return request;
+
+      if (!string.IsNullOrEmpty(request.error)) {
+        Debug.Log("Unable to fetch library: " + request.error);
+        callback(false, null);
+      } else {
+        Debug.Log(request.text);
+        JSONNode root = JSON.Parse(request.text);
+
+        if (root["success"] != null && root["success"].AsBool) {
+          // Parse the library list here.
+          Library lib = new Library();
+          lib.FromJSON(root);
+
+          callback(true, lib);
+        } else {
+          callback(false, null);
+        }
+      }
+
+      getLibraryCoroutine = null;
+    }
+
+    /// <summary>
+    /// Cancels the connection. This guarantees that the callback passed in from
+    /// connect will never be called. If no current connection is underway, does
+    /// nothing.
+    /// </summary>
+    public void CancelGetLibrary() {
+      StopCoroutine(getLibraryCoroutine);
+      getLibraryCoroutine = null;
+    }
+
+    #endregion
 
     void Awake() {
       if (shared != null) {

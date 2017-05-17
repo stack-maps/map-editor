@@ -38,6 +38,11 @@ namespace StackMaps {
     // The name of the floor, e.g. 1.
     public string floorName = "New Floor";
 
+    // The JSON representation of this floor. Since expanding the floor takes
+    // an api (prefab references and all), we use this as temporary container
+    // when we just received data from server but not ready to draw it out yet.
+    public string floorJSONCache = "";
+
     /// <summary>
     /// Serializes the whole floor to a single JSON object.
     /// </summary>
@@ -81,6 +86,12 @@ namespace StackMaps {
       floorName = root["fname"];
       floorOrder = root["fname"];
       libraryId = root["library"];
+
+      if (api == null) {
+        // Not ready to expand yet!
+        floorJSONCache = root.ToString();
+        return;
+      }
 
       aisles.Clear();
       aisleAreas.Clear();
