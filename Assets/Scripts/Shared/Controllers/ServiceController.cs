@@ -235,6 +235,74 @@ namespace StackMaps {
 
     #endregion
 
+    #region UpdateFloor
+
+    // The coroutine handling network connection.
+    Coroutine updateFloorCoroutine;
+
+    /// <summary>
+    /// A callback to UpdateFloor method called after server responds.
+    /// </summary>
+    /// <param name="success">Whether the sending of the request was successful.</param>
+    /// <param name="success">Whether the execution of the request was successful.</param>
+    public delegate void UpdateFloorCallback(bool success, bool authenticated);
+
+    /// <summary>
+    /// Fetches the given library in the database. Does nothing if there is
+    /// already a request under way.
+    /// </summary>
+    /// <param name = "f">Floor to update.</param>
+    /// <param name="callback">Callback function for data handling.</param>
+    public void UpdateFloor(Floor f, UpdateFloorCallback callback) {
+      if (updateFloorCoroutine != null) {
+        return;
+      }
+
+      updateFloorCoroutine = StartCoroutine(UpdateFloorLoop(f, callback));
+    }
+
+    IEnumerator UpdateFloorLoop(Floor f, UpdateFloorCallback callback) {
+      WWWForm form = new WWWForm();
+      form.AddField("request", "updateFloor");
+      form.AddField("fid", f.floorId);
+      form.AddField("floor_stuff", f.ToJSON().ToString());
+      form.AddField("token", token);
+
+      // Create a download object
+      WWW request = new WWW(apiUrl, form);
+
+      // Wait until the download is done
+      yield return request;
+
+      if (!string.IsNullOrEmpty(request.error)) {
+        Debug.Log("Unable to update floor: " + request.error);
+        callback(false, false);
+      } else {
+        Debug.Log(request.text);
+        JSONNode root = JSON.Parse(request.text);
+
+        if (root["success"] != null && root["success"].AsBool) {
+          callback(true, true);
+        } else {
+          callback(true, false);
+        }
+      }
+
+      updateFloorCoroutine = null;
+    }
+
+    /// <summary>
+    /// Cancels the connection. This guarantees that the callback passed in from
+    /// connect will never be called. If no current connection is underway, does
+    /// nothing.
+    /// </summary>
+    public void CancelUpdateFloor() {
+      StopCoroutine(updateFloorCoroutine);
+      updateFloorCoroutine = null;
+    }
+
+    #endregion
+
     void Awake() {
       if (shared != null) {
         Destroy(gameObject);

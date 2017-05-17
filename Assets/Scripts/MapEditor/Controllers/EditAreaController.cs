@@ -4,6 +4,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
 using System;
+using MaterialUI;
 
 namespace StackMaps {
   /// <summary>
@@ -331,6 +332,30 @@ namespace StackMaps {
     public void BeginEdit(Floor f) {
       root.SetActive(true);
       floorController.ImportFloor(f.floorJSONCache);
+    }
+
+    /// <summary>
+    /// Syncs the currently editing floor to the database.
+    /// </summary>
+    public void SaveFloor() {
+      DialogComplexProgress d = (DialogComplexProgress)DialogManager.CreateComplexProgressLinear();
+      d.Initialize("Uploading changes to database...", "Saving", MaterialIconHelper.GetIcon(MaterialIconEnum.HOURGLASS_EMPTY));
+      d.InitializeCancelButton("CANCEL", ServiceController.shared.CancelUpdateFloor);
+      d.Show();
+
+      ServiceController.shared.UpdateFloor(floorController.floor, (suc1, suc2) => {
+        d.Hide();
+
+        if (!suc1) {
+          DialogManager.ShowAlert("Unable to communicate with server!", 
+            "Connection Error", MaterialIconHelper.GetIcon(MaterialIconEnum.ERROR));
+        } else if (!suc2) {
+          DialogManager.ShowAlert("Login has expired! Please copy the text from File > Export Floor, relogin, open this floor again, File > Import Floor, and try again.",  
+            "Login Expired", MaterialIconHelper.GetIcon(MaterialIconEnum.ERROR));
+        } else {
+          DialogManager.ShowAlert("Floor has been updated.", "Success", MaterialIconHelper.GetIcon(MaterialIconEnum.CHECK));
+        }
+      });
     }
   }
 }
