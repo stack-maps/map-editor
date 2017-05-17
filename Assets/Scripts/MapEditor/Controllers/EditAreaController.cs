@@ -363,15 +363,5 @@ namespace StackMaps {
         }
       });
     }
-
-    public void OnFileDropdownItemSelect(int item) {
-      if (item == 2) {
-        SaveFloor();
-      } else if (item == 3) {
-
-      } else if (item == 4) {
-        
-      }
-    }
   }
 }

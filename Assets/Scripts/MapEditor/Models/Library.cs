@@ -40,11 +40,11 @@ namespace StackMaps {
       libraryId = root["lid"];
       libraryName = root["lname"];
 
-      if (root["Floor"] != null) {
+      if (root["floors"] != null) {
         floors = new List<Floor>();
 
         // Parse the floors here
-        foreach (JSONNode node in root["Floor"].AsArray) {
+        foreach (JSONNode node in root["floors"].AsArray) {
           Floor f = new Floor();
           f.FromJSON(null, node);
           floors.Add(f);

@@ -212,8 +212,7 @@ namespace StackMaps {
         if (root["success"] != null && root["success"].AsBool) {
           // Parse the library list here.
           Library lib = new Library();
-          lib.FromJSON(root);
-
+          lib.FromJSON(root["library"]);
           callback(true, lib);
         } else {
           callback(false, null);
@@ -386,23 +385,23 @@ namespace StackMaps {
     /// <summary>
     /// Create a new floor.
     /// </summary>
-    /// <param name = "libName">Name of the library.</param>
+    /// <param name = "libId">Id of the library.</param>
     /// <param name = "floorName">Name of the new floor.</param>
     /// <param name = "floorOrder">Order of the new floor.</param>
     /// <param name="callback">Callback function for data handling.</param>
-    public void CreateLibrary(string libName, string floorName, int floorOrder, CreateFloorCallback callback) {
+    public void CreateFloor(int libId, string floorName, int floorOrder, CreateFloorCallback callback) {
       if (createFloorCoroutine != null) {
         return;
       }
 
-      createFloorCoroutine = StartCoroutine(CreateFloorLoop(libName, floorName, floorOrder, callback));
+      createFloorCoroutine = StartCoroutine(CreateFloorLoop(libId, floorName, floorOrder, callback));
     }
 
-    IEnumerator CreateFloorLoop(string libName, string floorName, int floorOrder, CreateFloorCallback callback) {
+    IEnumerator CreateFloorLoop(int libId, string floorName, int floorOrder, CreateFloorCallback callback) {
       WWWForm form = new WWWForm();
       form.AddField("request", "createFloor");
       form.AddField("token", token);
-      form.AddField("libname", libName);
+      form.AddField("lid", libId);
       form.AddField("floorname", floorName);
       form.AddField("forder", floorOrder);
 

@@ -44,8 +44,8 @@ namespace StackMaps {
       Rectangle r = GetComponent<Rectangle>();
       root["center_x"] = r.GetCenter().x;
       root["center_y"] = r.GetCenter().y;
-      root["length"] = r.GetSize().x;
-      root["width"] = r.GetSize().y;
+      root["length"] = r.GetSize().y;
+      root["width"] = r.GetSize().x;
       root["rotation"] = r.GetRotation();
       root["Aisle"] = new JSONArray();
 
@@ -59,7 +59,7 @@ namespace StackMaps {
     public void FromJSON(FloorController api, JSONNode root) {
       Rectangle r = GetComponent<Rectangle>();
       r.SetCenter(new Vector2(root["center_x"].AsFloat, root["center_y"].AsFloat));
-      r.SetSize(new Vector2(root["length"].AsFloat, root["width"].AsFloat));
+      r.SetSize(new Vector2(root["width"].AsFloat, root["length"].AsFloat));
       r.SetRotation(root["rotation"].AsFloat);
 
       foreach (JSONNode node in root["Aisle"].AsArray) {

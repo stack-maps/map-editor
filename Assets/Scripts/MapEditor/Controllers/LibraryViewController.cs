@@ -22,12 +22,15 @@ namespace StackMaps {
 
     public EditAreaController editAreaController;
 
+    Library displayingLibrary;
+
     /// <summary>
     /// Displays the library view controller, populating the view with the given
     /// library's information. Assume the library is loaded.
     /// </summary>
     /// <param name="library">Library.</param>
     public void Show(Library library) {
+    displayingLibrary = library;
       UpdateMetaInfo(library);
       UpdateFloorPreviews(library);
       view.SetActive(true);
@@ -83,6 +86,43 @@ namespace StackMaps {
     void EditFloor(Floor f) {
       view.SetActive(false);
       editAreaController.BeginEdit(f);
+    }
+
+    public void OnAddFloorButtonPress() {
+      DialogManager.ShowPrompt("Floor Name", CreateFloor, "CREATE", 
+        "Create Floor", MaterialIconHelper.GetIcon(MaterialIconEnum.CREATE), null, "CANCEL");
+    }
+
+    void CreateFloor(string floorName) {
+      int libId = displayingLibrary.libraryId;
+      int order = displayingLibrary.floors.Count;
+
+      DialogComplexProgress d = (DialogComplexProgress)DialogManager.CreateComplexProgressLinear();
+      d.Initialize("Creating new floor...", "Loading", MaterialIconHelper.GetIcon(MaterialIconEnum.HOURGLASS_EMPTY));
+      d.InitializeCancelButton("CANCEL", ServiceController.shared.CancelCreateFloor);
+      d.Show();
+
+      ServiceController.shared.CreateFloor(libId, floorName, order, (suc1, suc2, id) => {
+        d.Hide();
+
+        if (!suc1) {
+          DialogManager.ShowAlert("Unable to communicate with server!", 
+            "Connection Error", MaterialIconHelper.GetIcon(MaterialIconEnum.ERROR));
+        } else if (!suc2) {
+          DialogManager.ShowAlert("Login has expired! Please relogin and try again.",  
+            "Login Expired", MaterialIconHelper.GetIcon(MaterialIconEnum.ERROR));
+        } else {
+          DialogManager.ShowAlert("Floor has been created.", "Success", MaterialIconHelper.GetIcon(MaterialIconEnum.CHECK));
+
+          // Add the newly created floor here.
+          Floor f = new Floor();
+          f.floorId = id;
+          f.floorName = floorName;
+          f.floorOrder = order;
+          displayingLibrary.floors.Add(f);
+          UpdateFloorPreviews(displayingLibrary);
+        }
+      });
     }
   }
 }

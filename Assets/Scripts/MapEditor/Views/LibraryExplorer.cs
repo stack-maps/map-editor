@@ -64,7 +64,7 @@ namespace StackMaps {
       container.Show(expandButton.isExpanded, true);
     }
 
-    void ConfigureCells() {
+    public void ConfigureCells() {
       // Remove
       for (int i = 1; i < container.transform.childCount; i++) {
         Destroy(container.transform.GetChild(i).gameObject);
