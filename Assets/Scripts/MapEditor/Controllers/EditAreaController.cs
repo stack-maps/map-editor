@@ -338,6 +338,12 @@ namespace StackMaps {
     /// Syncs the currently editing floor to the database.
     /// </summary>
     public void SaveFloor() {
+      if (!root.activeInHierarchy) {
+        DialogManager.ShowAlert("Open a library first!", 
+            "Unable to Save", MaterialIconHelper.GetIcon(MaterialIconEnum.ERROR));
+        return;
+      }
+
       DialogComplexProgress d = (DialogComplexProgress)DialogManager.CreateComplexProgressLinear();
       d.Initialize("Uploading changes to database...", "Saving", MaterialIconHelper.GetIcon(MaterialIconEnum.HOURGLASS_EMPTY));
       d.InitializeCancelButton("CANCEL", ServiceController.shared.CancelUpdateFloor);
@@ -356,6 +362,16 @@ namespace StackMaps {
           DialogManager.ShowAlert("Floor has been updated.", "Success", MaterialIconHelper.GetIcon(MaterialIconEnum.CHECK));
         }
       });
+    }
+
+    public void OnFileDropdownItemSelect(int item) {
+      if (item == 2) {
+        SaveFloor();
+      } else if (item == 3) {
+
+      } else if (item == 4) {
+        
+      }
     }
   }
 }

@@ -245,7 +245,7 @@ namespace StackMaps {
     /// </summary>
     /// <param name="success">Whether the sending of the request was successful.</param>
     /// <param name="success">Whether the execution of the request was successful.</param>
-    public delegate void UpdateFloorCallback(bool success, bool authenticated);
+    public delegate void UpdateFloorCallback(bool success,bool authenticated);
 
     /// <summary>
     /// Fetches the given library in the database. Does nothing if there is
@@ -299,6 +299,144 @@ namespace StackMaps {
     public void CancelUpdateFloor() {
       StopCoroutine(updateFloorCoroutine);
       updateFloorCoroutine = null;
+    }
+
+    #endregion
+
+    #region CreateLibrary
+
+    // The coroutine handling network connection.
+    Coroutine createLibraryCoroutine;
+
+    /// <summary>
+    /// A callback to CreateLibrary method called after server responds.
+    /// </summary>
+    /// <param name="success">Whether the sending of the request was successful.</param>
+    /// <param name="success">Whether the execution of the request was successful.</param>
+    /// <param name="libId">Thew newly created library ID.</param>
+    public delegate void CreateLibraryCallback(bool success,bool authenticated,int libId);
+
+    /// <summary>
+    /// Create a new library.
+    /// </summary>
+    /// <param name = "libName">Name of the library.</param>
+    /// <param name="callback">Callback function for data handling.</param>
+    public void CreateLibrary(string libName, CreateLibraryCallback callback) {
+      if (createLibraryCoroutine != null) {
+        return;
+      }
+
+      createLibraryCoroutine = StartCoroutine(CreateLibraryLoop(libName, callback));
+    }
+
+    IEnumerator CreateLibraryLoop(string libName, CreateLibraryCallback callback) {
+      WWWForm form = new WWWForm();
+      form.AddField("request", "createLibrary");
+      form.AddField("token", token);
+      form.AddField("libname", libName);
+
+      // Create a download object
+      WWW request = new WWW(apiUrl, form);
+
+      // Wait until the download is done
+      yield return request;
+
+      if (!string.IsNullOrEmpty(request.error)) {
+        Debug.Log("Unable to create library: " + request.error);
+        callback(false, false, 0);
+      } else {
+        Debug.Log(request.text);
+        JSONNode root = JSON.Parse(request.text);
+
+        if (root["success"] != null && root["success"].AsBool) {
+          callback(true, true, root["id"]);
+        } else {
+          callback(true, false, 0);
+        }
+      }
+
+      createLibraryCoroutine = null;
+    }
+
+    /// <summary>
+    /// Cancels the connection. This guarantees that the callback passed in from
+    /// connect will never be called. If no current connection is underway, does
+    /// nothing.
+    /// </summary>
+    public void CancelCreateLibrary() {
+      StopCoroutine(createLibraryCoroutine);
+      createLibraryCoroutine = null;
+    }
+
+    #endregion
+
+    #region CreateFloor
+
+    // The coroutine handling network connection.
+    Coroutine createFloorCoroutine;
+
+    /// <summary>
+    /// A callback to CreateLibrary method called after server responds.
+    /// </summary>
+    /// <param name="success">Whether the sending of the request was successful.</param>
+    /// <param name="success">Whether the execution of the request was successful.</param>
+    /// <param name="floorId">Thew newly created floor ID.</param>
+    public delegate void CreateFloorCallback(bool success, bool authenticated, int floorId);
+
+    /// <summary>
+    /// Create a new floor.
+    /// </summary>
+    /// <param name = "libName">Name of the library.</param>
+    /// <param name = "floorName">Name of the new floor.</param>
+    /// <param name = "floorOrder">Order of the new floor.</param>
+    /// <param name="callback">Callback function for data handling.</param>
+    public void CreateLibrary(string libName, string floorName, int floorOrder, CreateFloorCallback callback) {
+      if (createFloorCoroutine != null) {
+        return;
+      }
+
+      createFloorCoroutine = StartCoroutine(CreateFloorLoop(libName, floorName, floorOrder, callback));
+    }
+
+    IEnumerator CreateFloorLoop(string libName, string floorName, int floorOrder, CreateFloorCallback callback) {
+      WWWForm form = new WWWForm();
+      form.AddField("request", "createFloor");
+      form.AddField("token", token);
+      form.AddField("libname", libName);
+      form.AddField("floorname", floorName);
+      form.AddField("forder", floorOrder);
+
+      // Create a download object
+      WWW request = new WWW(apiUrl, form);
+
+      // Wait until the download is done
+      yield return request;
+
+      if (!string.IsNullOrEmpty(request.error)) {
+        Debug.Log("Unable to create floor: " + request.error);
+        callback(false, false, 0);
+      } else {
+        Debug.Log(request.text);
+        JSONNode root = JSON.Parse(request.text);
+
+        if (root["success"] != null && root["success"].AsBool) {
+          callback(true, true, root["id"]);
+        } else {
+          callback(true, false, 0);
+        }
+      }
+
+      createFloorCoroutine = null;
+    }
+
+    /// <summary>
+    /// Cancels the connection. This guarantees that the callback passed in from
+    /// connect will never be called. If no current connection is underway, does
+    /// nothing.
+    /// </summary>
+    public void CancelCreateFloor() {
+      StopCoroutine(createFloorCoroutine);
+      createFloorCoroutine = null;
     }
 
     #endregion
