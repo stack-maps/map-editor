@@ -20,8 +20,8 @@ namespace StackMaps {
 
     public LibraryViewController libraryViewController;
 
-
-    List<Library> libraries;
+    [SerializeField]
+    public List<Library> libraries;
 
     public enum DisplayMode {
       Loading,

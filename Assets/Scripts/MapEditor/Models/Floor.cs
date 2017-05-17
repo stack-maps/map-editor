@@ -1,12 +1,14 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
 using SimpleJSON;
+using System;
 
 namespace StackMaps {
   /// <summary>
   /// This class represents an entire floor of a library. A floor of a library
   /// consists of aisles, aisle areas, walls, and a reference image.
   /// </summary>
+  [Serializable]
   public class Floor {
     /// <summary>
     /// The floor identifier. This is always returned from the database.
@@ -82,6 +84,10 @@ namespace StackMaps {
     /// <param name = "api">The FloorController.</param>
     /// <param name="root">Root.</param>
     public void FromJSON(FloorController api, JSONNode root) {
+      if (root == null) {
+        return;
+      }
+
       floorId = root["fid"];
       floorName = root["fname"];
       floorOrder = root["fname"];
@@ -117,6 +123,51 @@ namespace StackMaps {
         Landmark landmark = api.CreateLandmark(Rect.zero, false, true);
         landmark.FromJSON(api, obj);
       }
+    }
+
+    /// <summary>
+    /// Returns the bounding rectangle of everything on this floor if loaded.
+    /// Otherwise returns a zero rect. Also returns zero rect when nothing is on
+    /// the floor.
+    /// </summary>
+    /// <returns>The bounding rect.</returns>
+    public Rect GetBoundingRect() {
+      List<Vector2> pts = new List<Vector2>();
+
+      foreach (Aisle obj in aisles) {
+        Rectangle r = obj.GetComponent<Rectangle>();
+        pts.Add(r.GetRect().min);
+        pts.Add(r.GetRect().max);
+      }
+
+      foreach (Landmark obj in landmarks) {
+        Rectangle r = obj.GetComponent<Rectangle>();
+        pts.Add(r.GetRect().min);
+        pts.Add(r.GetRect().max);
+      }
+
+      foreach (AisleArea obj in aisleAreas) {
+        Rectangle r = obj.GetComponent<Rectangle>();
+        pts.Add(r.GetRect().min);
+        pts.Add(r.GetRect().max);
+      }
+
+      foreach (Wall obj in walls) {
+        pts.Add(obj.GetStart());
+        pts.Add(obj.GetEnd());
+      }
+
+      Vector2 min = Vector2.zero;
+      Vector2 max = Vector2.zero;
+
+      foreach (Vector2 pt in pts) {
+        min.x = Mathf.Min(min.x, pt.x);
+        min.y = Mathf.Min(min.y, pt.y);
+        max.x = Mathf.Max(max.x, pt.x);
+        max.y = Mathf.Max(max.y, pt.y);
+      }
+
+      return Rect.MinMaxRect(min.x, min.y, max.x, max.y);
     }
   }
 }

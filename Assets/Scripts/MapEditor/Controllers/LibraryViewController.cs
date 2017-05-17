@@ -13,6 +13,7 @@ namespace StackMaps {
 
     public GameObject view;
     public RectTransform previewCellContainer;
+    public Transform previewEndCell;
 
     public Text libraryNameText;
     public Text libraryFloorCountText;
@@ -63,15 +64,16 @@ namespace StackMaps {
       // Put new ones in.
       for (int i = 0; i < library.floors.Count; i++) {
         FloorPreviewCell cell = Instantiate(floorPreviewCellPrefab, previewCellContainer);
+        Canvas.ForceUpdateCanvases();
         cell.SetFloorName(library.floors[i].floorName);
-        cell.SetCanMoveUp(i > 0);
-        cell.SetCanMoveDown(i < library.floors.Count);
+        // cell.SetCanMoveUp(i > 0);
+        // cell.SetCanMoveDown(i < library.floors.Count);
 
         floorPreviewController.DrawFloorPreview(cell.previewContainer, library.floors[i].floorJSONCache);
       }
 
       // Move the last cell last.
-      previewCellContainer.GetChild(0).SetAsLastSibling();
+      previewEndCell.SetAsLastSibling();
     }
   }
 }

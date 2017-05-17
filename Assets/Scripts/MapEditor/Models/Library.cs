@@ -2,11 +2,13 @@
 using System.Collections.Generic;
 using UnityEngine;
 using SimpleJSON;
+using System;
 
 namespace StackMaps {
   /// <summary>
   /// This class represents a library, containing floors.
   /// </summary>
+  [Serializable]
   public class Library {
     // The name of the library.
     public string libraryName = "New Library";
