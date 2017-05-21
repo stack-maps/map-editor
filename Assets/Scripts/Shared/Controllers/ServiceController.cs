@@ -51,10 +51,10 @@ namespace StackMaps {
 
       // We send in username and password. If successful, we are granted a
       // token which we can use to gain access to editing the map database.
-      loginCoroutine = StartCoroutine(LoginLoop(url, username, password, callback));
+      loginCoroutine = StartCoroutine(LoginLoop(username, password, callback));
     }
 
-    IEnumerator LoginLoop(string url, string username, string password, LoginCallback callback) {
+    IEnumerator LoginLoop(string username, string password, LoginCallback callback) {
       WWWForm form = new WWWForm();
       form.AddField("request", "login");
       form.AddField("username", username);
@@ -123,7 +123,7 @@ namespace StackMaps {
 
     IEnumerator GetLibraryListLoop(GetLibraryListCallback callback) {
       WWWForm form = new WWWForm();
-      form.AddField("request", "getLibraryList");
+      form.AddField("request", "get_library_list");
 
       // Create a download object
       WWW request = new WWW(apiUrl, form);
@@ -135,19 +135,22 @@ namespace StackMaps {
         Debug.Log("Unable to fetch library list: " + request.error);
         callback(false, null);
       } else {
-        Debug.Log(request.text);
         JSONNode root = JSON.Parse(request.text);
 
-        // Parse the library list here.
-        List<Library> libList = new List<Library>();
+        if (root["success"]) {
+          // Parse the library list here.
+          List<Library> libList = new List<Library>();
 
-        foreach (JSONNode node in root.AsArray) {
-          Library lib = new Library();
-          lib.FromJSON(node);
-          libList.Add(lib);
+          foreach (JSONNode node in root["data"].AsArray) {
+            Library lib = new Library();
+            lib.FromJSON(node);
+            libList.Add(lib);
+          }
+
+          callback(true, libList);
+        } else {
+          callback(false, null);
         }
-
-        callback(true, libList);
       }
 
       getLibraryListCoroutine = null;
@@ -193,8 +196,8 @@ namespace StackMaps {
 
     IEnumerator GetLibraryLoop(int libId, GetLibraryCallback callback) {
       WWWForm form = new WWWForm();
-      form.AddField("request", "getLibrary");
-      form.AddField("lid", libId);
+      form.AddField("request", "get_library");
+      form.AddField("library_id", libId);
 
       // Create a download object
       WWW request = new WWW(apiUrl, form);
@@ -206,13 +209,13 @@ namespace StackMaps {
         Debug.Log("Unable to fetch library: " + request.error);
         callback(false, null);
       } else {
-        Debug.Log(request.text);
         JSONNode root = JSON.Parse(request.text);
+        Debug.Log(root);
 
-        if (root["success"] != null && root["success"].AsBool) {
+        if (root["success"]) {
           // Parse the library list here.
           Library lib = new Library();
-          lib.FromJSON(root["library"]);
+          lib.FromJSON(root["data"]);
           callback(true, lib);
         } else {
           callback(false, null);
@@ -262,9 +265,8 @@ namespace StackMaps {
 
     IEnumerator UpdateFloorLoop(Floor f, UpdateFloorCallback callback) {
       WWWForm form = new WWWForm();
-      form.AddField("request", "updateFloor");
-      form.AddField("fid", f.floorId);
-      form.AddField("floor_stuff", f.ToJSON().ToString());
+      form.AddField("request", "update_floor");
+      form.AddField("floor", f.ToJSON().ToString());
       form.AddField("token", token);
 
       // Create a download object
@@ -330,9 +332,9 @@ namespace StackMaps {
 
     IEnumerator CreateLibraryLoop(string libName, CreateLibraryCallback callback) {
       WWWForm form = new WWWForm();
-      form.AddField("request", "createLibrary");
+      form.AddField("request", "create_library");
       form.AddField("token", token);
-      form.AddField("libname", libName);
+      form.AddField("library_name", libName);
 
       // Create a download object
       WWW request = new WWW(apiUrl, form);
@@ -380,7 +382,7 @@ namespace StackMaps {
     /// <param name="success">Whether the sending of the request was successful.</param>
     /// <param name="success">Whether the execution of the request was successful.</param>
     /// <param name="floorId">Thew newly created floor ID.</param>
-    public delegate void CreateFloorCallback(bool success, bool authenticated, int floorId);
+    public delegate void CreateFloorCallback(bool success,bool authenticated,int floorId);
 
     /// <summary>
     /// Create a new floor.
@@ -394,16 +396,18 @@ namespace StackMaps {
         return;
       }
 
+      Debug.Log("Creating floor");
+
       createFloorCoroutine = StartCoroutine(CreateFloorLoop(libId, floorName, floorOrder, callback));
     }
 
     IEnumerator CreateFloorLoop(int libId, string floorName, int floorOrder, CreateFloorCallback callback) {
       WWWForm form = new WWWForm();
-      form.AddField("request", "createFloor");
+      form.AddField("request", "create_floor");
       form.AddField("token", token);
-      form.AddField("lid", libId);
-      form.AddField("floorname", floorName);
-      form.AddField("forder", floorOrder);
+      form.AddField("library_id", libId);
+      form.AddField("floor_name", floorName);
+      form.AddField("floor_order", floorOrder);
 
       // Create a download object
       WWW request = new WWW(apiUrl, form);

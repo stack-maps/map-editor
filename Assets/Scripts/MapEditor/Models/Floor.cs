@@ -51,28 +51,29 @@ namespace StackMaps {
     /// <returns>The JSO.</returns>
     public JSONNode ToJSON() {
       JSONObject root = new JSONObject();
-      root["fid"] = floorId;
-      root["fname"] = floorName;
+      root["floor_id"] = floorId;
+      root["floor_name"] = floorName;
       root["library"] = libraryId;
-      root["Aisle"] = new JSONArray();
-      root["AisleArea"] = new JSONArray();
-      root["Wall"] = new JSONArray();
-      root["Landmark"] = new JSONArray();
+      root["floor_order"] = floorOrder;
+      root["aisles"] = new JSONArray();
+      root["aisle_areas"] = new JSONArray();
+      root["walls"] = new JSONArray();
+      root["landmarks"] = new JSONArray();
 
       foreach (Aisle aisle in aisles) {
-        root["Aisle"].Add(aisle.ToJSON());
+        root["aisles"].Add(aisle.ToJSON());
       }
 
       foreach (AisleArea area in aisleAreas) {
-        root["AisleArea"].Add(area.ToJSON());
+        root["aisle_areas"].Add(area.ToJSON());
       }
 
       foreach (Wall wall in walls) {
-        root["Wall"].Add(wall.ToJSON());
+        root["walls"].Add(wall.ToJSON());
       }
 
       foreach (Landmark landmark in landmarks) {
-        root["Landmark"].Add(landmark.ToJSON());
+        root["landmarks"].Add(landmark.ToJSON());
       }
 
       return root;
@@ -88,9 +89,9 @@ namespace StackMaps {
         return;
       }
 
-      floorId = root["fid"];
-      floorName = root["fname"];
-      floorOrder = root["fname"];
+      floorId = root["floor_id"];
+      floorName = root["floor_name"];
+      floorOrder = root["floor_order"];
       libraryId = root["library"];
 
       if (api == null) {
@@ -104,22 +105,22 @@ namespace StackMaps {
       walls.Clear();
       landmarks.Clear();
 
-      foreach (JSONObject obj in root["Aisle"].AsArray) {
+      foreach (JSONObject obj in root["aisles"].AsArray) {
         Aisle aisle = api.CreateAisle(Rect.zero, false, true);
         aisle.FromJSON(api, obj);
       }
 
-      foreach (JSONObject obj in root["AisleArea"].AsArray) {
+      foreach (JSONObject obj in root["aisle_areas"].AsArray) {
         AisleArea aisleArea = api.CreateAisleArea(Rect.zero, false, true);
         aisleArea.FromJSON(api, obj);
       }
 
-      foreach (JSONObject obj in root["Wall"].AsArray) {
+      foreach (JSONObject obj in root["walls"].AsArray) {
         Wall wall = api.CreateWall(Vector2.zero, Vector2.zero, false, true);
         wall.FromJSON(api, obj);
       }
 
-      foreach (JSONObject obj in root["Landmark"].AsArray) {
+      foreach (JSONObject obj in root["landmarks"].AsArray) {
         Landmark landmark = api.CreateLandmark(Rect.zero, false, true);
         landmark.FromJSON(api, obj);
       }

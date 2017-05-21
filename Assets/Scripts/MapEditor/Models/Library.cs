@@ -26,8 +26,8 @@ namespace StackMaps {
     /// <returns>The JSO.</returns>
     public JSONNode ToJSON() {
       JSONObject root = new JSONObject();
-      root["lid"] = libraryId;
-      root["lname"] = libraryName;
+      root["library_id"] = libraryId;
+      root["library_name"] = libraryName;
 
       return root;
     }
@@ -37,8 +37,8 @@ namespace StackMaps {
     /// </summary>
     /// <param name="root">Root.</param>
     public void FromJSON(JSONNode root) {
-      libraryId = root["lid"];
-      libraryName = root["lname"];
+      libraryId = root["library_id"];
+      libraryName = root["library_name"];
 
       if (root["floors"] != null) {
         floors = new List<Floor>();

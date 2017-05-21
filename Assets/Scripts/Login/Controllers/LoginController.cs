@@ -38,7 +38,6 @@ namespace StackMaps {
         d.Hide();
       });
 
-      DontDestroyOnLoad(d.gameObject);
       d.Show();
 
       ServiceController.shared.Login(api, username, password, (success, authenticated) => {

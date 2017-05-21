@@ -66,12 +66,19 @@ namespace StackMaps {
     /// </summary>
     public bool isSideA;
 
+    /// <summary>
+    /// Returns whether the call range has one side missing.
+    /// </summary>
+    /// <returns><c>true</c>, if incomplete, <c>false</c> otherwise.</returns>
+    public bool IsIncomplete() {
+      return string.IsNullOrEmpty(begin.ToString()) || string.IsNullOrEmpty(end.ToString());
+    }
 
     public JSONNode ToJSON() {
       JSONObject root = new JSONObject();
       root["collection"] = collection ?? "";
-      root["callstart"] = begin.ToString();
-      root["callend"] = end.ToString();
+      root["call_start"] = begin.ToString();
+      root["call_end"] = end.ToString();
       root["side"] = isSideA ? 0 : 1;
 
       return root;
@@ -79,8 +86,8 @@ namespace StackMaps {
 
     public void FromJSON(FloorController api, JSONNode root) {
       collection = root["collection"] ?? "";
-      begin = new CallNumber(root["callstart"]);
-      end = new CallNumber(root["callend"]);
+      begin = new CallNumber(root["call_start"]);
+      end = new CallNumber(root["call_end"]);
       isSideA = root["side"].AsInt == 0;
     }
   }
