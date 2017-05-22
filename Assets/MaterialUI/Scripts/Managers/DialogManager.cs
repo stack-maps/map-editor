@@ -229,6 +229,22 @@ namespace MaterialUI
         }
 
         /// <summary>
+        /// Creates a complex linear progress dialog that can be modified or stored before showing.
+        /// <para></para>
+        /// Before calling <see cref="DialogProgress.Show"/>, call <see cref="DialogProgress.Initialize(string,string,ImageData,bool)"/>.
+        /// <para></para>
+        /// For a simpler solution with less customizability, use <see cref="ShowProgressLinear(string,string,ImageData,bool)"/>.
+        /// </summary>
+        /// <returns>The instance of the created dialog.</returns>
+        public static DialogProgress CreateComplexProgressLinear()
+        {
+            DialogProgress dialog = PrefabManager.InstantiateGameObject("DialogComplexProgress", instance.transform).GetComponent<DialogProgress>();
+            dialog.SetupIndicator(true);
+            dialog.Initialize();
+            return dialog;
+        }
+
+        /// <summary>
         /// Shows a circular progress dialog with an optional body text, and a required progress indicator.
         /// <para></para>
         /// For more customizability, use <see cref="CreateProgressCircular"/>.

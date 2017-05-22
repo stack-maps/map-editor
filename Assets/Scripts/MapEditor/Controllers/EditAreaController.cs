@@ -4,6 +4,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
 using System;
+using MaterialUI;
 
 namespace StackMaps {
   /// <summary>
@@ -17,6 +18,9 @@ namespace StackMaps {
 
     // The canvas where things are actually on the map.
     public RectTransform canvas;
+
+    // The root object under our control.
+    public GameObject root;
 
     // The scroll rect of the edit area.
     public ScrollRect scrollRect;
@@ -46,7 +50,6 @@ namespace StackMaps {
 
     // The cursor id.
     int crosshairId = 99;
-    int dragId = 99;
 
     // Selection tool
     public GameObject _selectedObject;
@@ -320,6 +323,45 @@ namespace StackMaps {
     public void OnRedoButtonPress() {
       ActionManager.shared.Redo();
       ProcessSelection(null);
+    }
+
+    /// <summary>
+    /// Begins editing floor f.
+    /// </summary>
+    /// <param name="f">The floor to edit, fully loaded from server.</param>
+    public void BeginEdit(Floor f) {
+      root.SetActive(true);
+      floorController.ImportFloor(f.floorJSONCache);
+    }
+
+    /// <summary>
+    /// Syncs the currently editing floor to the database.
+    /// </summary>
+    public void SaveFloor() {
+      if (!root.activeInHierarchy) {
+        DialogManager.ShowAlert("Open a library first!", 
+            "Unable to Save", MaterialIconHelper.GetIcon(MaterialIconEnum.ERROR));
+        return;
+      }
+
+      DialogComplexProgress d = (DialogComplexProgress)DialogManager.CreateComplexProgressLinear();
+      d.Initialize("Uploading changes to database...", "Saving", MaterialIconHelper.GetIcon(MaterialIconEnum.HOURGLASS_EMPTY));
+      d.InitializeCancelButton("CANCEL", ServiceController.shared.CancelUpdateFloor);
+      d.Show();
+
+      ServiceController.shared.UpdateFloor(floorController.floor, (suc1, suc2) => {
+        d.Hide();
+
+        if (!suc1) {
+          DialogManager.ShowAlert("Unable to communicate with server!", 
+            "Connection Error", MaterialIconHelper.GetIcon(MaterialIconEnum.ERROR));
+        } else if (!suc2) {
+          DialogManager.ShowAlert("Login has expired! Please copy the text from File > Export Floor, relogin, open this floor again, File > Import Floor, and try again.",  
+            "Login Expired", MaterialIconHelper.GetIcon(MaterialIconEnum.ERROR));
+        } else {
+          DialogManager.ShowAlert("Floor has been updated.", "Success", MaterialIconHelper.GetIcon(MaterialIconEnum.CHECK));
+        }
+      });
     }
   }
 }

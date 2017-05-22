@@ -43,18 +43,20 @@ namespace StackMaps {
       Rectangle r = GetComponent<Rectangle>();
       root["center_x"] = r.GetCenter().x;
       root["center_y"] = r.GetCenter().y;
-      root["length"] = r.GetSize().x;
-      root["width"] = r.GetSize().y;
+      root["height"] = r.GetSize().y;
+      root["width"] = r.GetSize().x;
       root["rotation"] = r.GetRotation();
-      root["sides"] = singleSided ? 1 : 2;
-      root["call-range"] = new JSONArray();
+      root["is_double_sided"] = !singleSided;
+      root["call_ranges"] = new JSONArray();
 
       foreach (CallNumberRange range in callNumberRanges) {
+        if (range.IsIncomplete()) {
+          continue;
+        }
+
         JSONNode rangeNode = range.ToJSON();
-        root["call-range"].Add(rangeNode);
+        root["call_ranges"].Add(rangeNode);
       }
-
-
 
       return root;
     }
@@ -62,18 +64,16 @@ namespace StackMaps {
     public void FromJSON(FloorController api, JSONNode root) {
       Rectangle r = GetComponent<Rectangle>();
       r.SetCenter(new Vector2(root["center_x"].AsFloat, root["center_y"].AsFloat));
-      r.SetSize(new Vector2(root["length"].AsFloat, root["width"].AsFloat));
+      r.SetSize(new Vector2(root["width"].AsFloat, root["height"].AsFloat));
       r.SetRotation(root["rotation"].AsFloat);
-      singleSided = root["sides"] == 1;
-      callNumberRanges.Clear();
+      singleSided = root["is_double_sided"].AsInt == 0;
+      callNumberRanges = new List<CallNumberRange>();
 
-      foreach (JSONNode node in root["call-range"].AsArray) {
+      foreach (JSONNode node in root["call_ranges"].AsArray) {
         CallNumberRange range = new CallNumberRange();
         range.FromJSON(api, node);
         callNumberRanges.Add(range);
       }
-
-      name = "(" + ActionManager.shared.index + ")" + r.GetHashCode();
     }
   }
 }

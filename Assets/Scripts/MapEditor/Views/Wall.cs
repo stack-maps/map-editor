@@ -44,19 +44,17 @@ namespace StackMaps {
 
     public JSONNode ToJSON() {
       JSONObject root = new JSONObject();
-      root["x1"] = start.x;
-      root["y1"] = start.y;
-      root["x2"] = end.x;
-      root["y2"] = end.y;
+      root["start_x"] = start.x;
+      root["start_y"] = start.y;
+      root["end_x"] = end.x;
+      root["end_y"] = end.y;
 
       return root;
     }
 
     public void FromJSON(FloorController api, JSONNode root) {
-      SetStart(new Vector2(root["x1"].AsFloat, root["y1"].AsFloat));
-      SetEnd(new Vector2(root["x2"].AsFloat, root["y2"].AsFloat));
-
-      name = "(" + ActionManager.shared.index + ")" + GetHashCode();
+      SetStart(new Vector2(root["start_x"].AsFloat, root["start_y"].AsFloat));
+      SetEnd(new Vector2(root["end_x"].AsFloat, root["end_y"].AsFloat));
     }
 
     public override int GetHashCode() {
