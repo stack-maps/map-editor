@@ -4,6 +4,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
 using System;
+using MaterialUI;
 
 namespace StackMaps {
   /// <summary>
@@ -18,6 +19,9 @@ namespace StackMaps {
     // The canvas where things are actually on the map.
     public RectTransform canvas;
 
+    // The root object under our control.
+    public GameObject root;
+
     // The scroll rect of the edit area.
     public ScrollRect scrollRect;
 
@@ -30,6 +34,9 @@ namespace StackMaps {
     // The transform editor.
     public TransformEditor transformEditor;
 
+    // The grid line controller
+    public GridController gridController;
+
     // The floor controller, a data-heavy class dealing with representation and
     // serialization of the floor.
     public FloorController floorController;
@@ -40,6 +47,9 @@ namespace StackMaps {
     // The point where user pressed the mouse.
     Vector3 mouseDownPos;
     bool dragInitiated;
+
+    // The cursor id.
+    int crosshairId = 99;
 
     // Selection tool
     public GameObject _selectedObject;
@@ -58,6 +68,8 @@ namespace StackMaps {
       Selectable.delegates.Add(ProcessSelection);
       transformEditor.snapGridSize = snapGridSize;
       transformEditor.snapAngleSize = snapAngleSize;
+      gridController.gridSize = snapGridSize;
+      gridController.UpdateGrid(canvas.sizeDelta);
     }
 	
     // Update is called once per frame
@@ -140,7 +152,7 @@ namespace StackMaps {
     /// </summary>
     void ToggleCursor() {
       if (!IsMouseInEditingArea()) {
-        Cursor.SetCursor(null, Vector2.zero, CursorMode.Auto);
+        CursorController.PopCursor(crosshairId);
         return;
       }
 
@@ -152,9 +164,10 @@ namespace StackMaps {
       ToolType current = toolbarController.toolbar.GetActiveTool();
 
       if (current != ToolType.SelectionTool) {
-        Cursor.SetCursor(cursorCrosshair, new Vector2(17.5f, 17.5f), CursorMode.Auto);
+        if (CursorController.GetCurrentId() < crosshairId)
+          crosshairId = CursorController.PushCursor(cursorCrosshair, new Vector2(17.5f, 17.5f));
       } else {
-        Cursor.SetCursor(null, Vector2.zero, CursorMode.Auto);
+        CursorController.PopCursor(crosshairId);
       }
     }
 
@@ -217,8 +230,8 @@ namespace StackMaps {
     void ProcessInputForWallTool() {
       if (dragInitiated) {
         bool completed = Input.GetMouseButtonUp(0);
-        Vector2 begin = canvas.InverseTransformPoint(mouseDownPos);
-        Vector2 end = canvas.InverseTransformPoint(Input.mousePosition);
+        Vector2 begin = SnapToGrid(canvas.InverseTransformPoint(mouseDownPos));
+        Vector2 end = SnapToGrid(canvas.InverseTransformPoint(Input.mousePosition));
         floorController.CreateWall(begin, end, !completed);
       }
     }
@@ -310,6 +323,45 @@ namespace StackMaps {
     public void OnRedoButtonPress() {
       ActionManager.shared.Redo();
       ProcessSelection(null);
+    }
+
+    /// <summary>
+    /// Begins editing floor f.
+    /// </summary>
+    /// <param name="f">The floor to edit, fully loaded from server.</param>
+    public void BeginEdit(Floor f) {
+      root.SetActive(true);
+      floorController.ImportFloor(f.floorJSONCache);
+    }
+
+    /// <summary>
+    /// Syncs the currently editing floor to the database.
+    /// </summary>
+    public void SaveFloor() {
+      if (!root.activeInHierarchy) {
+        DialogManager.ShowAlert("Open a library first!", 
+            "Unable to Save", MaterialIconHelper.GetIcon(MaterialIconEnum.ERROR));
+        return;
+      }
+
+      DialogComplexProgress d = (DialogComplexProgress)DialogManager.CreateComplexProgressLinear();
+      d.Initialize("Uploading changes to database...", "Saving", MaterialIconHelper.GetIcon(MaterialIconEnum.HOURGLASS_EMPTY));
+      d.InitializeCancelButton("CANCEL", ServiceController.shared.CancelUpdateFloor);
+      d.Show();
+
+      ServiceController.shared.UpdateFloor(floorController.floor, (suc1, suc2) => {
+        d.Hide();
+
+        if (!suc1) {
+          DialogManager.ShowAlert("Unable to communicate with server!", 
+            "Connection Error", MaterialIconHelper.GetIcon(MaterialIconEnum.ERROR));
+        } else if (!suc2) {
+          DialogManager.ShowAlert("Login has expired! Please copy the text from File > Export Floor, relogin, open this floor again, File > Import Floor, and try again.",  
+            "Login Expired", MaterialIconHelper.GetIcon(MaterialIconEnum.ERROR));
+        } else {
+          DialogManager.ShowAlert("Floor has been updated.", "Success", MaterialIconHelper.GetIcon(MaterialIconEnum.CHECK));
+        }
+      });
     }
   }
 }

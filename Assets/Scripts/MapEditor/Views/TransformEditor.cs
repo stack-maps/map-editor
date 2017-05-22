@@ -251,7 +251,7 @@ namespace StackMaps {
           Resize(delta, movingPt, oppositePt, false, true);
         } else if (editingWall != null) {
           // We just call set method. And we are done!
-          editingWall.SetStart(editingWall.GetStart() + delta);
+          editingWall.SetStart(cachedWallStart + delta);
           UpdateTransform();
         }
       };
@@ -271,7 +271,7 @@ namespace StackMaps {
           Resize(delta, movingPt, oppositePt, true, false);
         } else if (editingWall != null) {
           // We just call set method. And we are done!
-          editingWall.SetEnd(editingWall.GetEnd() + delta);
+          editingWall.SetEnd(cachedWallEnd + delta);
           UpdateTransform();
         }
       };

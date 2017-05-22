@@ -28,7 +28,7 @@ namespace StackMaps {
     /// <summary>
     /// The data structure holding floor information, capable of serialization.
     /// </summary>
-    Floor floor = new Floor();
+    public Floor floor = new Floor();
 
     /// <summary>
     /// The preview object before creation.

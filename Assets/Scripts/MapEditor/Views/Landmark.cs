@@ -35,7 +35,7 @@ namespace StackMaps {
     }
 
     void Update() {
-      if (icon != null && landmarkIcons[landmarkType] != null)
+      if (icon != null && landmarkIcons != null && landmarkIcons[landmarkType] != null)
         icon.SetImage(landmarkIcons[landmarkType]);
     }
 
@@ -58,10 +58,10 @@ namespace StackMaps {
       Rectangle r = GetComponent<Rectangle>();
       root["center_x"] = r.GetCenter().x;
       root["center_y"] = r.GetCenter().y;
-      root["length"] = r.GetSize().x;
-      root["width"] = r.GetSize().y;
+      root["height"] = r.GetSize().y;
+      root["width"] = r.GetSize().x;
       root["rotation"] = r.GetRotation();
-      root["lname"] = landmarkType.ToString();
+      root["landmark_type"] = landmarkType.ToString();
 
       return root;
     }
@@ -69,12 +69,12 @@ namespace StackMaps {
     public void FromJSON(FloorController api, JSONNode root) {
       Rectangle r = GetComponent<Rectangle>();
       r.SetCenter(new Vector2(root["center_x"].AsFloat, root["center_y"].AsFloat));
-      r.SetSize(new Vector2(root["length"].AsFloat, root["width"].AsFloat));
+      r.SetSize(new Vector2(root["width"].AsFloat, root["height"].AsFloat));
       r.SetRotation(root["rotation"].AsFloat);
       LandmarkType t;
 
       try {
-        t = (LandmarkType)Enum.Parse(typeof(LandmarkType), root["lname"]);
+        t = (LandmarkType)Enum.Parse(typeof(LandmarkType), root["landmark_type"]);
       } catch (ArgumentException ex) {
         Debug.LogWarning("Bad landmark type loaded! " + ex.Message);
         t = LandmarkType.Restroom;
@@ -82,8 +82,6 @@ namespace StackMaps {
 
       landmarkType = t;
       Update();
-
-      name = "(" + ActionManager.shared.index + ")" + r.GetHashCode();
     }
   }
 }

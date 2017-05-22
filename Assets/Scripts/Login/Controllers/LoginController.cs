@@ -6,41 +6,82 @@ using MaterialUI;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
 
-/// <summary>
-/// This class, together with ServiceController, handles all the logic behind
-/// Login scene.
-/// </summary>
-public class LoginController : MonoBehaviour {
-
+namespace StackMaps {
   /// <summary>
-  /// The login button is pressed.
+  /// This class, together with ServiceController, handles all the logic behind
+  /// Login scene.
   /// </summary>
-  public void OnLoginButtonTrigger() {
-    // Placeholder
+  public class LoginController : MonoBehaviour {
+    public MaterialInputField usernameInputField;
+    public MaterialInputField passwordInputField;
+    public MaterialInputField addressInputField;
+    public Image screenTransitionMask;
 
-    DialogProgress dialog = DialogManager.ShowProgressLinear("Connecting to server...", "Loading", MaterialIconHelper.GetIcon(MaterialIconEnum.HOURGLASS_EMPTY));
-    StartCoroutine(HideWindowAfterSeconds(dialog, 3.0f));
-  }
+    void Start() {
+      usernameInputField.inputField.text = PlayerPrefs.GetString(PlayerPrefsKey.SavedUsername);
+      addressInputField.inputField.text = PlayerPrefs.GetString(PlayerPrefsKey.SavedAddress);
+    }
 
-  IEnumerator HideWindowAfterSeconds(MaterialDialog dialog, float duration) {
-    yield return new WaitForSeconds(duration);
-    dialog.Hide();
-    SceneManager.LoadScene(1);
-  }
+    /// <summary>
+    /// The login button is pressed.
+    /// </summary>
+    public void OnLoginButtonPress() {
+      // Placeholder
+      string username = usernameInputField.inputField.text;
+      string password = passwordInputField.inputField.text;
+      string api = addressInputField.inputField.text;
 
-  void Update() {
-    if (Input.GetKeyDown(KeyCode.Tab)) {
-      Selectable next = EventSystem.current.currentSelectedGameObject.GetComponent<Selectable>().FindSelectableOnDown();
+      DialogComplexProgress d = (DialogComplexProgress)DialogManager.CreateComplexProgressLinear();
+      d.Initialize("Connecting to server...", "Loading", MaterialIconHelper.GetIcon(MaterialIconEnum.HOURGLASS_EMPTY));
+      d.InitializeCancelButton("Cancel", () => {
+        ServiceController.shared.CancelLogin();
+        d.Hide();
+      });
 
-      if (next != null) {
-        InputField inputfield = next.GetComponent<InputField>();
+      d.Show();
 
-        if (inputfield != null) {
-          inputfield.OnPointerClick(new PointerEventData(EventSystem.current));
-          EventSystem.current.SetSelectedGameObject(next.gameObject, new BaseEventData(EventSystem.current));
+      ServiceController.shared.Login(api, username, password, (success, authenticated) => {
+        if (success && authenticated) {
+          PlayerPrefs.SetString(PlayerPrefsKey.SavedAddress, api);
+          PlayerPrefs.SetString(PlayerPrefsKey.SavedUsername, username);
+          AsyncOperation o = SceneManager.LoadSceneAsync(1);
+          o.allowSceneActivation = false;
+
+          TweenManager.TweenFloat(v => {
+            Color c = screenTransitionMask.color;
+            c.a = v;
+            screenTransitionMask.color = c;
+          }, 0, 1, 0.6f, 0, () => o.allowSceneActivation = true);
+
+        } else {
+          if (!success)
+            DialogManager.ShowAlert("Unable to connect to the given address.", 
+              "Connection Error", MaterialIconHelper.GetIcon(MaterialIconEnum.ERROR));
+          else
+            DialogManager.ShowAlert("Incorrect username or password.", 
+              "Login Failed", MaterialIconHelper.GetIcon(MaterialIconEnum.ERROR));
+        }
+
+        d.Hide();
+      });
+
+    }
+
+
+    void Update() {
+      if (Input.GetKeyDown(KeyCode.Tab)) {
+        UnityEngine.UI.Selectable next = EventSystem.current.currentSelectedGameObject.GetComponent<UnityEngine.UI.Selectable>().FindSelectableOnDown();
+
+        if (next != null) {
+          InputField inputfield = next.GetComponent<InputField>();
+
+          if (inputfield != null) {
+            inputfield.OnPointerClick(new PointerEventData(EventSystem.current));
+            EventSystem.current.SetSelectedGameObject(next.gameObject, new BaseEventData(EventSystem.current));
+          }
         }
       }
     }
-  }
  
+  }
 }

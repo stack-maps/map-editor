@@ -160,7 +160,7 @@ namespace StackMaps {
         // Then we compare the cutters.
         if ((HasCutter1() && !other.HasCutter1())) {
           return 1;
-        } else if ((!HasSubclass() && other.HasSubclass())) {
+        } else if ((!HasCutter1() && other.HasCutter1())) {
           return -1;
         } else if (!HasCutter1() && !other.HasCutter1()) {
           return 0;
