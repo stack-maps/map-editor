@@ -51,7 +51,7 @@ namespace StackMaps {
             Color c = screenTransitionMask.color;
             c.a = v;
             screenTransitionMask.color = c;
-          }, 0, 1, 0.6f, 0, () => o.allowSceneActivation = true);
+          }, 0, 1, 0.3f, 0, () => o.allowSceneActivation = true);
 
         } else {
           if (!success)
