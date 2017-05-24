@@ -87,6 +87,7 @@ namespace StackMaps {
     }
 
     public void OnLogoutButtonPressed() {
+      Selectable.ClearDelegates();
       ServiceController.shared.Logout();
       SceneManager.LoadScene(0);
     }
