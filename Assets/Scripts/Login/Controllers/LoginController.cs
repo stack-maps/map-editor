@@ -20,6 +20,12 @@ namespace StackMaps {
     void Start() {
       usernameInputField.inputField.text = PlayerPrefs.GetString(PlayerPrefsKey.SavedUsername);
       addressInputField.inputField.text = PlayerPrefs.GetString(PlayerPrefsKey.SavedAddress);
+
+      TweenManager.TweenFloat(v => {
+        Color c = screenTransitionMask.color;
+        c.a = v;
+        screenTransitionMask.color = c;
+      }, 1, 0, 1f);
     }
 
     /// <summary>

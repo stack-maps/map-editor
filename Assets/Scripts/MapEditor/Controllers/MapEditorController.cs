@@ -23,8 +23,7 @@ namespace StackMaps {
         Color c = screenTransitionMask.color;
         c.a = v;
         screenTransitionMask.color = c;
-      }, 100, 0, 1f);
-
+      }, 1, 0, 1f);
 
       editAreaController = GetComponentInChildren<EditAreaController>(true);
     }
@@ -89,7 +88,15 @@ namespace StackMaps {
     public void OnLogoutButtonPressed() {
       Selectable.ClearDelegates();
       ServiceController.shared.Logout();
-      SceneManager.LoadScene(0);
+
+      AsyncOperation o = SceneManager.LoadSceneAsync(0);
+      o.allowSceneActivation = false;
+
+      TweenManager.TweenFloat(v => {
+        Color c = screenTransitionMask.color;
+        c.a = v;
+        screenTransitionMask.color = c;
+      }, 0, 1, 0.3f, 0, () => o.allowSceneActivation = true);
     }
   }
 }
