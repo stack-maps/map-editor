@@ -20,6 +20,12 @@ namespace StackMaps {
     void Start() {
       usernameInputField.inputField.text = PlayerPrefs.GetString(PlayerPrefsKey.SavedUsername);
       addressInputField.inputField.text = PlayerPrefs.GetString(PlayerPrefsKey.SavedAddress);
+
+      TweenManager.TweenFloat(v => {
+        Color c = screenTransitionMask.color;
+        c.a = v;
+        screenTransitionMask.color = c;
+      }, 1, 0, 1f);
     }
 
     /// <summary>
@@ -51,7 +57,7 @@ namespace StackMaps {
             Color c = screenTransitionMask.color;
             c.a = v;
             screenTransitionMask.color = c;
-          }, 0, 1, 0.6f, 0, () => o.allowSceneActivation = true);
+          }, 0, 1, 0.3f, 0, () => o.allowSceneActivation = true);
 
         } else {
           if (!success)

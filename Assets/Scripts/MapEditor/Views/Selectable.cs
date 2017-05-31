@@ -30,6 +30,13 @@ namespace StackMaps {
     /// <summary>
     /// A list of delegates that will receive calls when any object is clicked.
     /// </summary>
-    public static List<SelectableDelegate> delegates = new List<SelectableDelegate>();
+    public readonly static List<SelectableDelegate> delegates = new List<SelectableDelegate>();
+
+    /// <summary>
+    /// Removes all delegates. Called on destroy.
+    /// </summary>
+    public static void ClearDelegates() {
+      delegates.Clear();
+    }
   }
 }
